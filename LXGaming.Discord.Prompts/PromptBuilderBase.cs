@@ -11,13 +11,13 @@ public abstract class PromptBuilderBase<TPromptBuilder, TPrompt>
     public PromptMessage? CancelMessage { get; set; } = new PromptMessageBuilder()
         .WithEmbeds(new EmbedBuilder()
             .WithColor(Color.Red)
-            .WithFooter("Cancelled", "https://repo.lxgaming.me/assets/fluency/cancel.png")
+            .WithFooter("Cancelled")
             .Build())
         .Build();
     public PromptMessage? ExpireMessage { get; set; } = new PromptMessageBuilder()
         .WithEmbeds(new EmbedBuilder()
             .WithColor(Color.Orange)
-            .WithFooter("Expired", "https://repo.lxgaming.me/assets/fluency/clock.png")
+            .WithFooter("Expired")
             .Build())
         .Build();
 
