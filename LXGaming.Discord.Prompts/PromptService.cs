@@ -103,14 +103,14 @@ public class PromptService : IAsyncDisposable {
         return true;
     }
 
-    public async Task<IUserMessage> FollowupAsync(IDiscordInteraction interaction, CustomPrompt prompt, TimeSpan timeout,
+    public async Task<IUserMessage> FollowupAsync(IDiscordInteraction interaction, CustomPrompt prompt, TimeSpan? timeout = null,
         string? text = null, Embed? embed = null, AllowedMentions? allowedMentions = null) {
         var message = await interaction.FollowupAsync(text, embed: embed, allowedMentions: allowedMentions, components: prompt.Components);
         _ = RegisterAsync(message, prompt, timeout);
         return message;
     }
 
-    public async Task<IUserMessage> ModifyOriginalResponseAsync(IDiscordInteraction interaction, CustomPrompt prompt, TimeSpan timeout,
+    public async Task<IUserMessage> ModifyOriginalResponseAsync(IDiscordInteraction interaction, CustomPrompt prompt, TimeSpan? timeout = null,
         string? text = null, Embed? embed = null, AllowedMentions? allowedMentions = null) {
         var message = await interaction.ModifyOriginalResponseAsync(properties => {
             properties.Content = text;
@@ -122,7 +122,7 @@ public class PromptService : IAsyncDisposable {
         return message;
     }
 
-    public async Task<IUserMessage> RespondAsync(IDiscordInteraction interaction, CustomPrompt prompt, TimeSpan timeout,
+    public async Task<IUserMessage> RespondAsync(IDiscordInteraction interaction, CustomPrompt prompt, TimeSpan? timeout = null,
         string? text = null, Embed? embed = null, AllowedMentions? allowedMentions = null) {
         await interaction.RespondAsync(text, embed: embed, allowedMentions: allowedMentions, components: prompt.Components);
         var message = await interaction.GetOriginalResponseAsync();
@@ -130,14 +130,14 @@ public class PromptService : IAsyncDisposable {
         return message;
     }
 
-    public async Task<IUserMessage> FollowupAsync(IDiscordInteraction interaction, ConfirmationPrompt prompt, TimeSpan timeout,
+    public async Task<IUserMessage> FollowupAsync(IDiscordInteraction interaction, ConfirmationPrompt prompt, TimeSpan? timeout = null,
         string? text = null, Embed? embed = null, AllowedMentions? allowedMentions = null) {
         var message = await interaction.FollowupAsync(text, embed: embed, allowedMentions: allowedMentions, components: prompt.Components);
         _ = RegisterAsync(message, prompt, timeout);
         return message;
     }
 
-    public async Task<IUserMessage> ModifyOriginalResponseAsync(IDiscordInteraction interaction, ConfirmationPrompt prompt, TimeSpan timeout,
+    public async Task<IUserMessage> ModifyOriginalResponseAsync(IDiscordInteraction interaction, ConfirmationPrompt prompt, TimeSpan? timeout = null,
         string? text = null, Embed? embed = null, AllowedMentions? allowedMentions = null) {
         var message = await interaction.ModifyOriginalResponseAsync(properties => {
             properties.Content = text;
@@ -149,7 +149,7 @@ public class PromptService : IAsyncDisposable {
         return message;
     }
 
-    public async Task<IUserMessage> RespondAsync(IDiscordInteraction interaction, ConfirmationPrompt prompt, TimeSpan timeout,
+    public async Task<IUserMessage> RespondAsync(IDiscordInteraction interaction, ConfirmationPrompt prompt, TimeSpan? timeout = null,
         string? text = null, Embed? embed = null, AllowedMentions? allowedMentions = null) {
         await interaction.RespondAsync(text, embed: embed, allowedMentions: allowedMentions, components: prompt.Components);
         var message = await interaction.GetOriginalResponseAsync();
@@ -157,7 +157,7 @@ public class PromptService : IAsyncDisposable {
         return message;
     }
 
-    public async Task<IUserMessage> FollowupAsync(IDiscordInteraction interaction, PaginationPromptBase prompt, TimeSpan timeout) {
+    public async Task<IUserMessage> FollowupAsync(IDiscordInteraction interaction, PaginationPromptBase prompt, TimeSpan? timeout = null) {
         var page = await prompt.GetPageAsync(prompt.CurrentPage);
         var message = await interaction.FollowupAsync(
             page.Content,
@@ -170,7 +170,7 @@ public class PromptService : IAsyncDisposable {
         return message;
     }
 
-    public async Task<IUserMessage> ModifyOriginalResponseAsync(IDiscordInteraction interaction, PaginationPromptBase prompt, TimeSpan timeout) {
+    public async Task<IUserMessage> ModifyOriginalResponseAsync(IDiscordInteraction interaction, PaginationPromptBase prompt, TimeSpan? timeout = null) {
         var page = await prompt.GetPageAsync(prompt.CurrentPage);
         var message = await interaction.ModifyOriginalResponseAsync(properties => {
             properties.Content = page.Content;
@@ -182,7 +182,7 @@ public class PromptService : IAsyncDisposable {
         return message;
     }
 
-    public async Task<IUserMessage> RespondAsync(IDiscordInteraction interaction, PaginationPromptBase prompt, TimeSpan timeout) {
+    public async Task<IUserMessage> RespondAsync(IDiscordInteraction interaction, PaginationPromptBase prompt, TimeSpan? timeout = null) {
         var page = await prompt.GetPageAsync(prompt.CurrentPage);
         await interaction.RespondAsync(
             page.Content,
