@@ -20,7 +20,7 @@ public abstract class PaginationPromptBase : PromptBase {
 
     public abstract Task<PromptMessage> GetPageAsync(int index);
 
-    public override async Task<bool> ExecuteAsync(IComponentInteraction component) {
+    public override async Task<PromptResult> ExecuteAsync(IComponentInteraction component) {
         var id = component.Data.CustomId;
         if (string.Equals(id, "first")) {
             CurrentPage = 0;
@@ -39,7 +39,10 @@ public abstract class PaginationPromptBase : PromptBase {
         } else if (string.Equals(id, "last")) {
             CurrentPage = TotalPages - 1;
         } else {
-            throw new InvalidOperationException($"{id} is not supported");
+            return new PromptResult {
+                Message = $"{id} is not supported",
+                Status = PromptStatus.UnsupportedComponent
+            };
         }
 
         await component.DeferAsync();
@@ -52,6 +55,8 @@ public abstract class PaginationPromptBase : PromptBase {
             properties.AllowedMentions = page.AllowedMentions;
         });
 
-        return false;
+        return new PromptResult {
+            Status = PromptStatus.Success
+        };
     }
 }

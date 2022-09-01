@@ -16,7 +16,7 @@ public class ConfirmationPrompt : PromptBase {
         Action = action;
     }
 
-    public override async Task<bool> ExecuteAsync(IComponentInteraction component) {
+    public override async Task<PromptResult> ExecuteAsync(IComponentInteraction component) {
         var id = component.Data.CustomId;
         bool value;
         if (string.Equals(id, FalseKey)) {
@@ -24,9 +24,16 @@ public class ConfirmationPrompt : PromptBase {
         } else if (string.Equals(id, TrueKey)) {
             value = true;
         } else {
-            throw new InvalidOperationException($"{id} is not supported");
+            return new PromptResult {
+                Message = $"{id} is not supported",
+                Status = PromptStatus.UnsupportedComponent
+            };
         }
 
-        return await Action(component, value);
+        var result = await Action(component, value);
+        return new PromptResult {
+            Status = PromptStatus.Success,
+            Unregister = result
+        };
     }
 }

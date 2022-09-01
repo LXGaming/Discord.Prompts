@@ -13,7 +13,11 @@ public class CustomPrompt : PromptBase {
         Action = action;
     }
 
-    public override async Task<bool> ExecuteAsync(IComponentInteraction component) {
-        return await Action(component);
+    public override async Task<PromptResult> ExecuteAsync(IComponentInteraction component) {
+        var result = await Action(component);
+        return new PromptResult {
+            Status = PromptStatus.Success,
+            Unregister = result
+        };
     }
 }

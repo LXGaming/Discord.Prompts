@@ -24,21 +24,28 @@ public class PromptService : IAsyncDisposable {
         _promptTasks = new ConcurrentDictionary<ulong, CancellableTask>();
     }
 
-    public async Task<bool> ExecuteAsync(IComponentInteraction interaction) {
+    public async Task<PromptResult> ExecuteAsync(IComponentInteraction interaction) {
         if (!_promptTasks.TryGetValue(interaction.Message.Id, out var existingPromptTask)) {
-            return false;
+            return new PromptResult {
+                Message = $"{interaction.Message.Id} is not registered",
+                Status = PromptStatus.UnregisteredMessage
+            };
         }
 
         var prompt = existingPromptTask.Prompt;
         if (!prompt.IsValidUser(interaction.User)) {
-            return true;
+            return new PromptResult {
+                Message = $"{interaction.User.Id} is not valid",
+                Status = PromptStatus.InvalidUser
+            };
         }
 
-        if (await prompt.ExecuteAsync(interaction)) {
+        var result = await prompt.ExecuteAsync(interaction);
+        if (result.Unregister) {
             await UnregisterAsync(interaction.Message.Id, true);
         }
 
-        return true;
+        return result;
     }
 
     public Task RegisterAsync(IUserMessage message, PromptBase prompt, TimeSpan? timeout = null, CancellationToken cancellationToken = default) {

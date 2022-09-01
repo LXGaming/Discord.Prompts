@@ -17,9 +17,7 @@ public abstract class PromptBase {
         ExpireMessage = expireMessage;
     }
 
-    public virtual Task<bool> ExecuteAsync(IComponentInteraction interaction) {
-        return Task.FromResult(false);
-    }
+    public abstract Task<PromptResult> ExecuteAsync(IComponentInteraction interaction);
 
     public bool IsValidUser(IUser user) {
         if (user.IsBot || user.IsWebhook) {
