@@ -88,7 +88,7 @@ public class PromptService : IAsyncDisposable {
                 await channel.ModifyMessageAsync(messageId, properties => {
                     properties.Content = promptMessage.Content;
                     properties.Embeds = promptMessage.Embeds;
-                    properties.Components = new ComponentBuilder().Build();
+                    properties.Components = promptMessage.Components ?? new ComponentBuilder().Build();
                     properties.AllowedMentions = promptMessage.AllowedMentions;
                 });
             }
