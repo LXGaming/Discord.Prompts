@@ -47,27 +47,28 @@ public abstract class PaginationPromptBase : PromptBase {
 
         await component.DeferAsync();
 
-        MessageComponent components;
         var page = await GetPageAsync(CurrentPage);
-        if (page.Components != null) {
-            var componentBuilder = new ComponentBuilder();
-            Append(componentBuilder, page.Components);
-            Append(componentBuilder, Components);
-            components = componentBuilder.Build();
-        } else {
-            components = Components;
-        }
-
         await component.ModifyOriginalResponseAsync(properties => {
             properties.Content = page.Content;
             properties.Embeds = page.Embeds;
-            properties.Components = components;
+            properties.Components = GetComponents(page);
             properties.AllowedMentions = page.AllowedMentions;
         });
 
         return new PromptResult {
             Status = PromptStatus.Success
         };
+    }
+
+    public MessageComponent GetComponents(PromptMessage page) {
+        if (page.Components == null) {
+            return Components;
+        }
+
+        var componentBuilder = new ComponentBuilder();
+        Append(componentBuilder, page.Components);
+        Append(componentBuilder, Components);
+        return componentBuilder.Build();
     }
 
     private static void Append(ComponentBuilder componentBuilder, MessageComponent messageComponent) {

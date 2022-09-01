@@ -172,7 +172,7 @@ public class PromptService : IAsyncDisposable {
             false,
             false,
             page.AllowedMentions,
-            prompt.Components);
+            prompt.GetComponents(page));
         _ = RegisterAsync(message, prompt, timeout);
         return message;
     }
@@ -183,7 +183,7 @@ public class PromptService : IAsyncDisposable {
             properties.Content = page.Content;
             properties.Embeds = page.Embeds;
             properties.AllowedMentions = page.AllowedMentions;
-            properties.Components = prompt.Components;
+            properties.Components = prompt.GetComponents(page);
         });
         _ = RegisterAsync(message, prompt, timeout);
         return message;
@@ -197,7 +197,7 @@ public class PromptService : IAsyncDisposable {
             false,
             false,
             page.AllowedMentions,
-            prompt.Components);
+            prompt.GetComponents(page));
         var message = await interaction.GetOriginalResponseAsync();
         _ = RegisterAsync(message, prompt, timeout);
         return message;
