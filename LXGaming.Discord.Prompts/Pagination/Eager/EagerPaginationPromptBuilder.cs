@@ -18,8 +18,12 @@ public class EagerPaginationPromptBuilder : PromptBuilderBase<EagerPaginationPro
             Pages.ToArray());
     }
 
-    public EagerPaginationPromptBuilder WithPage(string? content = null, params Embed[] embeds) {
-        return WithPages(new PromptMessageBuilder().WithContent(content).WithEmbeds(embeds).Build());
+    public EagerPaginationPromptBuilder WithPage(MessageComponent? components = null, string? content = null, params Embed[] embeds) {
+        return WithPages(new PromptMessageBuilder()
+            .WithComponents(components)
+            .WithContent(content)
+            .WithEmbeds(embeds)
+            .Build());
     }
 
     public EagerPaginationPromptBuilder WithPages(params PromptMessage[] pages) {
