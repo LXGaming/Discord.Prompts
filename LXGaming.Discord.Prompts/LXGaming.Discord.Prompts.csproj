@@ -27,6 +27,7 @@
 
     <ItemGroup>
       <PackageReference Include="Discord.Net.WebSocket" Version="3.10.0" />
+      <PackageReference Include="LXGaming.Common.Threading" Version="1.5.1" />
       <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
     </ItemGroup>
 

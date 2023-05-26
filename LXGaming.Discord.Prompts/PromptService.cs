@@ -14,14 +14,14 @@ public class PromptService : IAsyncDisposable {
     private readonly BaseSocketClient _client;
     private readonly ILogger<PromptService> _logger;
     private readonly PromptServiceConfig _config;
-    private readonly ConcurrentDictionary<ulong, CancellableTask> _promptTasks;
+    private readonly ConcurrentDictionary<ulong, CancellableTaskImpl> _promptTasks;
     private bool _disposed;
 
     public PromptService(BaseSocketClient client, ILogger<PromptService> logger, PromptServiceConfig config) {
         _client = client;
         _logger = logger;
         _config = config;
-        _promptTasks = new ConcurrentDictionary<ulong, CancellableTask>();
+        _promptTasks = new ConcurrentDictionary<ulong, CancellableTaskImpl>();
     }
 
     public async Task<PromptResult> ExecuteAsync(IComponentInteraction interaction) {
@@ -59,7 +59,7 @@ public class PromptService : IAsyncDisposable {
 
         var channelId = message.Channel.Id;
         var messageId = message.Id;
-        var promptTask = _promptTasks.GetOrAdd(message.Id, _ => new CancellableTask(prompt));
+        var promptTask = _promptTasks.GetOrAdd(message.Id, _ => new CancellableTaskImpl(prompt));
         return promptTask.StartAsync(async () => {
             using var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
                 promptTask.CancellationToken,
