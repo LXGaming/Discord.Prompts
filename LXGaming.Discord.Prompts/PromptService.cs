@@ -1,6 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using Discord;
-using Discord.WebSocket;
 using LXGaming.Discord.Prompts.Confirmation;
 using LXGaming.Discord.Prompts.Custom;
 using LXGaming.Discord.Prompts.Pagination;
@@ -11,13 +10,13 @@ namespace LXGaming.Discord.Prompts;
 
 public class PromptService : IAsyncDisposable {
 
-    private readonly BaseSocketClient _client;
+    private readonly IDiscordClient _client;
     private readonly ILogger<PromptService> _logger;
     private readonly PromptServiceConfig _config;
     private readonly ConcurrentDictionary<ulong, CancellableTaskImpl> _promptTasks;
     private bool _disposed;
 
-    public PromptService(BaseSocketClient client, ILogger<PromptService> logger, PromptServiceConfig config) {
+    public PromptService(IDiscordClient client, ILogger<PromptService> logger, PromptServiceConfig config) {
         _client = client;
         _logger = logger;
         _config = config;
@@ -72,7 +71,8 @@ public class PromptService : IAsyncDisposable {
                 }
             }
 
-            if (_client.GetChannel(channelId) is not IMessageChannel channel) {
+            var channel = await _client.GetChannelAsync(channelId);
+            if (channel is not IMessageChannel messageChannel) {
                 _logger.LogWarning("Channel {Id} not an {Type}", channelId, nameof(IMessageChannel));
                 return;
             }
@@ -83,9 +83,9 @@ public class PromptService : IAsyncDisposable {
             }
 
             if (promptMessage.Delete ?? false) {
-                await channel.DeleteMessageAsync(messageId);
+                await messageChannel.DeleteMessageAsync(messageId);
             } else {
-                await channel.ModifyMessageAsync(messageId, properties => {
+                await messageChannel.ModifyMessageAsync(messageId, properties => {
                     properties.Content = promptMessage.Content;
                     properties.Embeds = promptMessage.Embeds;
                     properties.Components = promptMessage.Components ?? new ComponentBuilder().Build();
