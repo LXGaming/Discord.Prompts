@@ -21,7 +21,7 @@ public class LazyPaginationPrompt : PaginationPromptBase {
             return existingPage;
         }
 
-        var page = await Action(index);
+        var page = await Action(index).ConfigureAwait(false);
         _cachedPages[index] = page;
         return page;
     }

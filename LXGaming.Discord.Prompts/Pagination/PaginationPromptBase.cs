@@ -45,15 +45,15 @@ public abstract class PaginationPromptBase : PromptBase {
             };
         }
 
-        await component.DeferAsync();
+        await component.DeferAsync().ConfigureAwait(false);
 
-        var page = await GetPageAsync(CurrentPage);
+        var page = await GetPageAsync(CurrentPage).ConfigureAwait(false);
         await component.ModifyOriginalResponseAsync(properties => {
             properties.Content = page.Content;
             properties.Embeds = page.Embeds;
             properties.Components = GetComponents(page);
             properties.AllowedMentions = page.AllowedMentions;
-        });
+        }).ConfigureAwait(false);
 
         return new PromptResult {
             Status = PromptStatus.Success

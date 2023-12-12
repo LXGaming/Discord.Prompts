@@ -30,7 +30,7 @@ public class ConfirmationPrompt : PromptBase {
             };
         }
 
-        var result = await Action(component, value);
+        var result = await Action(component, value).ConfigureAwait(false);
         return new PromptResult {
             Status = PromptStatus.Success,
             Unregister = result

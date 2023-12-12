@@ -14,7 +14,7 @@ public class CustomPrompt : PromptBase {
     }
 
     public override async Task<PromptResult> ExecuteAsync(IComponentInteraction component) {
-        var result = await Action(component);
+        var result = await Action(component).ConfigureAwait(false);
         return new PromptResult {
             Status = PromptStatus.Success,
             Unregister = result
