@@ -31,7 +31,7 @@ public class EagerPaginationPromptBuilder : PromptBuilderBase<EagerPaginationPro
             return this;
         }
 
-        Pages ??= new List<PromptMessage>();
+        Pages ??= [];
         Pages.AddRange(pages);
         return this;
     }

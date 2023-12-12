@@ -39,7 +39,7 @@ public sealed class PromptMessageBuilder {
             return this;
         }
 
-        Embeds ??= new List<Embed>();
+        Embeds ??= [];
         Embeds.AddRange(embeds);
         return this;
     }

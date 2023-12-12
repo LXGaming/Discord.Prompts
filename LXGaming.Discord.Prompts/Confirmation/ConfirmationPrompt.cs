@@ -2,19 +2,19 @@
 
 namespace LXGaming.Discord.Prompts.Confirmation;
 
-public class ConfirmationPrompt : PromptBase {
+public class ConfirmationPrompt(
+    ulong[] roleIds,
+    ulong[] userIds,
+    PromptMessage? cancelMessage,
+    PromptMessage? expireMessage,
+    MessageComponent components,
+    Func<IComponentInteraction, bool, Task<bool>> action) : PromptBase(roleIds, userIds, cancelMessage, expireMessage) {
 
     public const string FalseKey = "false";
     public const string TrueKey = "true";
 
-    public override MessageComponent Components { get; }
-    public Func<IComponentInteraction, bool, Task<bool>> Action { get; }
-
-    public ConfirmationPrompt(ulong[] roleIds, ulong[] userIds, PromptMessage? cancelMessage, PromptMessage? expireMessage,
-        MessageComponent components, Func<IComponentInteraction, bool, Task<bool>> action) : base(roleIds, userIds, cancelMessage, expireMessage) {
-        Components = components;
-        Action = action;
-    }
+    public override MessageComponent Components { get; } = components;
+    public Func<IComponentInteraction, bool, Task<bool>> Action { get; } = action;
 
     public override async Task<PromptResult> ExecuteAsync(IComponentInteraction component) {
         var id = component.Data.CustomId;

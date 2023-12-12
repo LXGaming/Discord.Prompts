@@ -2,19 +2,18 @@
 
 namespace LXGaming.Discord.Prompts.Pagination.Lazy;
 
-public class LazyPaginationPrompt : PaginationPromptBase {
+public class LazyPaginationPrompt(
+    ulong[] roleIds,
+    ulong[] userIds,
+    PromptMessage? cancelMessage,
+    PromptMessage? expireMessage,
+    Func<int, Task<PromptMessage>> action,
+    int totalPages) : PaginationPromptBase(roleIds, userIds, cancelMessage, expireMessage) {
 
-    public Func<int, Task<PromptMessage>> Action { get; }
-    public override int TotalPages { get; }
+    public Func<int, Task<PromptMessage>> Action { get; } = action;
+    public override int TotalPages { get; } = totalPages;
 
-    private readonly ConcurrentDictionary<int, PromptMessage> _cachedPages;
-
-    public LazyPaginationPrompt(ulong[] roleIds, ulong[] userIds, PromptMessage? cancelMessage, PromptMessage? expireMessage,
-        Func<int, Task<PromptMessage>> action, int totalPages) : base(roleIds, userIds, cancelMessage, expireMessage) {
-        Action = action;
-        TotalPages = totalPages;
-        _cachedPages = new ConcurrentDictionary<int, PromptMessage>();
-    }
+    private readonly ConcurrentDictionary<int, PromptMessage> _cachedPages = new();
 
     public override async Task<PromptMessage> GetPageAsync(int index) {
         if (_cachedPages.TryGetValue(index, out var existingPage)) {

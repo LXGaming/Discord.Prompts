@@ -2,20 +2,17 @@
 
 namespace LXGaming.Discord.Prompts;
 
-public abstract class PromptBase {
+public abstract class PromptBase(
+    ulong[] roleIds,
+    ulong[] userIds,
+    PromptMessage? cancelMessage,
+    PromptMessage? expireMessage) {
 
-    public ulong[] RoleIds { get; }
-    public ulong[] UserIds { get; }
-    public PromptMessage? CancelMessage { get; }
-    public PromptMessage? ExpireMessage { get; }
+    public ulong[] RoleIds { get; } = roleIds;
+    public ulong[] UserIds { get; } = userIds;
+    public PromptMessage? CancelMessage { get; } = cancelMessage;
+    public PromptMessage? ExpireMessage { get; } = expireMessage;
     public abstract MessageComponent Components { get; }
-
-    protected PromptBase(ulong[] roleIds, ulong[] userIds, PromptMessage? cancelMessage, PromptMessage? expireMessage) {
-        RoleIds = roleIds;
-        UserIds = userIds;
-        CancelMessage = cancelMessage;
-        ExpireMessage = expireMessage;
-    }
 
     public abstract Task<PromptResult> ExecuteAsync(IComponentInteraction interaction);
 

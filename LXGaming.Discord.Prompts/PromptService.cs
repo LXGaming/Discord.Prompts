@@ -6,20 +6,13 @@ using Microsoft.Extensions.Logging;
 
 namespace LXGaming.Discord.Prompts;
 
-public class PromptService : IAsyncDisposable {
+public class PromptService(
+    IDiscordClient client,
+    ILogger<PromptService> logger,
+    PromptServiceConfig config) : IAsyncDisposable {
 
-    private readonly IDiscordClient _client;
-    private readonly ILogger<PromptService> _logger;
-    private readonly PromptServiceConfig _config;
-    private readonly ConcurrentDictionary<ulong, CancellableTaskImpl> _promptTasks;
+    private readonly ConcurrentDictionary<ulong, CancellableTaskImpl> _promptTasks = new();
     private bool _disposed;
-
-    public PromptService(IDiscordClient client, ILogger<PromptService> logger, PromptServiceConfig config) {
-        _client = client;
-        _logger = logger;
-        _config = config;
-        _promptTasks = new ConcurrentDictionary<ulong, CancellableTaskImpl>();
-    }
 
     public async Task<PromptResult> ExecuteAsync(IComponentInteraction interaction) {
         if (!_promptTasks.TryGetValue(interaction.Message.Id, out var existingPromptTask)) {
@@ -50,9 +43,9 @@ public class PromptService : IAsyncDisposable {
             throw new InvalidOperationException("Message is already registered");
         }
 
-        var delay = timeout ?? _config.DefaultTimeout;
+        var delay = timeout ?? config.DefaultTimeout;
 
-        _logger.LogTrace("Registering prompt {Id} for expiration in {Delay}", message.Id, delay);
+        logger.LogTrace("Registering prompt {Id} for expiration in {Delay}", message.Id, delay);
 
         var channelId = message.Channel.Id;
         var messageId = message.Id;
@@ -69,13 +62,15 @@ public class PromptService : IAsyncDisposable {
                 }
             }
 
-            var channel = await _client.GetChannelAsync(channelId).ConfigureAwait(false);
+            var channel = await client.GetChannelAsync(channelId).ConfigureAwait(false);
             if (channel is not IMessageChannel messageChannel) {
-                _logger.LogWarning("Channel {Id} not an {Type}", channelId, nameof(IMessageChannel));
+                logger.LogWarning("Channel {Id} not an {Type}", channelId, nameof(IMessageChannel));
                 return;
             }
 
-            var promptMessage = cancellationTokenSource.IsCancellationRequested ? promptTask.Prompt.CancelMessage : promptTask.Prompt.ExpireMessage;
+            var promptMessage = cancellationTokenSource.IsCancellationRequested
+                ? promptTask.Prompt.CancelMessage
+                : promptTask.Prompt.ExpireMessage;
             if (promptMessage == null) {
                 return;
             }
@@ -98,7 +93,7 @@ public class PromptService : IAsyncDisposable {
             return false;
         }
 
-        _logger.LogTrace("Unregistering prompt {Id} ({Stop})", key, stop);
+        logger.LogTrace("Unregistering prompt {Id} ({Stop})", key, stop);
 
         if (stop) {
             await existingPromptTask.StopAsync().ConfigureAwait(false);

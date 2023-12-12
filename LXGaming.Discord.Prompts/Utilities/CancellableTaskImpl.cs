@@ -2,11 +2,7 @@
 
 namespace LXGaming.Discord.Prompts.Utilities;
 
-public class CancellableTaskImpl : CancellableTask {
+public class CancellableTaskImpl(PromptBase prompt) : CancellableTask {
 
-    public PromptBase Prompt { get; }
-
-    public CancellableTaskImpl(PromptBase prompt) {
-        Prompt = prompt;
-    }
+    public PromptBase Prompt { get; } = prompt;
 }

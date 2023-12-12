@@ -2,7 +2,11 @@
 
 namespace LXGaming.Discord.Prompts.Pagination;
 
-public abstract class PaginationPromptBase : PromptBase {
+public abstract class PaginationPromptBase(
+    ulong[] roleIds,
+    ulong[] userIds,
+    PromptMessage? cancelMessage,
+    PromptMessage? expireMessage) : PromptBase(roleIds, userIds, cancelMessage, expireMessage) {
 
     public override MessageComponent Components => new ComponentBuilder()
         .WithButton("First", "first", disabled: TotalPages < 3)
@@ -13,10 +17,6 @@ public abstract class PaginationPromptBase : PromptBase {
         .Build();
     public int CurrentPage { get; private set; }
     public abstract int TotalPages { get; }
-
-    protected PaginationPromptBase(ulong[] roleIds, ulong[] userIds, PromptMessage? cancelMessage, PromptMessage? expireMessage)
-        : base(roleIds, userIds, cancelMessage, expireMessage) {
-    }
 
     public abstract Task<PromptMessage> GetPageAsync(int index);
 
