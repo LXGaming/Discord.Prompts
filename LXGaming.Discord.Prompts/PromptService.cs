@@ -1,7 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using Discord;
-using LXGaming.Discord.Prompts.Confirmation;
-using LXGaming.Discord.Prompts.Custom;
 using LXGaming.Discord.Prompts.Pagination;
 using LXGaming.Discord.Prompts.Utilities;
 using Microsoft.Extensions.Logging;
@@ -110,110 +108,100 @@ public class PromptService : IAsyncDisposable {
         return true;
     }
 
-    public async Task<IUserMessage> FollowupAsync(IDiscordInteraction interaction, CustomPrompt prompt, TimeSpan? timeout = null,
-        string? text = null, Embed? embed = null, AllowedMentions? allowedMentions = null) {
-        var message = await interaction.FollowupAsync(
-            text,
-            embed: embed,
-            allowedMentions: allowedMentions,
-            components: prompt.Components).ConfigureAwait(false);
-        _ = RegisterAsync(message, prompt, timeout);
-        return message;
-    }
-
-    public async Task<IUserMessage> ModifyOriginalResponseAsync(IDiscordInteraction interaction, CustomPrompt prompt, TimeSpan? timeout = null,
-        string? text = null, Embed? embed = null, AllowedMentions? allowedMentions = null) {
-        var message = await interaction.ModifyOriginalResponseAsync(properties => {
-            properties.Content = text;
-            properties.Embed = embed;
-            properties.AllowedMentions = allowedMentions;
-            properties.Components = prompt.Components;
-        }).ConfigureAwait(false);
-        _ = RegisterAsync(message, prompt, timeout);
-        return message;
-    }
-
-    public async Task<IUserMessage> RespondAsync(IDiscordInteraction interaction, CustomPrompt prompt, TimeSpan? timeout = null,
-        string? text = null, Embed? embed = null, AllowedMentions? allowedMentions = null) {
-        await interaction.RespondAsync(
-            text,
-            embed: embed,
-            allowedMentions: allowedMentions,
-            components: prompt.Components).ConfigureAwait(false);
-        var message = await interaction.GetOriginalResponseAsync().ConfigureAwait(false);
-        _ = RegisterAsync(message, prompt, timeout);
-        return message;
-    }
-
-    public async Task<IUserMessage> FollowupAsync(IDiscordInteraction interaction, ConfirmationPrompt prompt, TimeSpan? timeout = null,
-        string? text = null, Embed? embed = null, AllowedMentions? allowedMentions = null) {
-        var message = await interaction.FollowupAsync(
-            text,
-            embed: embed,
-            allowedMentions: allowedMentions,
-            components: prompt.Components).ConfigureAwait(false);
-        _ = RegisterAsync(message, prompt, timeout);
-        return message;
-    }
-
-    public async Task<IUserMessage> ModifyOriginalResponseAsync(IDiscordInteraction interaction, ConfirmationPrompt prompt, TimeSpan? timeout = null,
-        string? text = null, Embed? embed = null, AllowedMentions? allowedMentions = null) {
-        var message = await interaction.ModifyOriginalResponseAsync(properties => {
-            properties.Content = text;
-            properties.Embed = embed;
-            properties.AllowedMentions = allowedMentions;
-            properties.Components = prompt.Components;
-        }).ConfigureAwait(false);
-        _ = RegisterAsync(message, prompt, timeout);
-        return message;
-    }
-
-    public async Task<IUserMessage> RespondAsync(IDiscordInteraction interaction, ConfirmationPrompt prompt, TimeSpan? timeout = null,
-        string? text = null, Embed? embed = null, AllowedMentions? allowedMentions = null) {
-        await interaction.RespondAsync(
-            text,
-            embed: embed,
-            allowedMentions: allowedMentions,
-            components: prompt.Components).ConfigureAwait(false);
-        var message = await interaction.GetOriginalResponseAsync().ConfigureAwait(false);
-        _ = RegisterAsync(message, prompt, timeout);
-        return message;
-    }
-
-    public async Task<IUserMessage> FollowupAsync(IDiscordInteraction interaction, PaginationPromptBase prompt, TimeSpan? timeout = null) {
+    public async Task<IUserMessage> FollowupAsync(
+        IDiscordInteraction interaction, PaginationPromptBase prompt, TimeSpan? timeout = null,
+        bool isTTS = false, bool ephemeral = false, RequestOptions? options = null) {
         var page = await prompt.GetPageAsync(prompt.CurrentPage).ConfigureAwait(false);
         var message = await interaction.FollowupAsync(
             page.Content,
             page.Embeds,
-            false,
-            false,
+            isTTS,
+            ephemeral,
             page.AllowedMentions,
-            prompt.GetComponents(page)).ConfigureAwait(false);
+            prompt.GetComponents(page),
+            null,
+            options).ConfigureAwait(false);
         _ = RegisterAsync(message, prompt, timeout);
         return message;
     }
 
-    public async Task<IUserMessage> ModifyOriginalResponseAsync(IDiscordInteraction interaction, PaginationPromptBase prompt, TimeSpan? timeout = null) {
+    public async Task<IUserMessage> FollowupAsync(
+        IDiscordInteraction interaction, PromptBase prompt, TimeSpan? timeout = null,
+        string? text = null, Embed[]? embeds = null, bool isTTS = false, bool ephemeral = false,
+        AllowedMentions? allowedMentions = null, Embed? embed = null, RequestOptions? options = null) {
+        var message = await interaction.FollowupAsync(
+            text,
+            embeds,
+            isTTS,
+            ephemeral,
+            allowedMentions,
+            prompt.Components,
+            embed,
+            options).ConfigureAwait(false);
+        _ = RegisterAsync(message, prompt, timeout);
+        return message;
+    }
+
+    public async Task<IUserMessage> ModifyOriginalResponseAsync(
+        IDiscordInteraction interaction, PaginationPromptBase prompt, TimeSpan? timeout = null,
+        RequestOptions? options = null) {
         var page = await prompt.GetPageAsync(prompt.CurrentPage).ConfigureAwait(false);
         var message = await interaction.ModifyOriginalResponseAsync(properties => {
             properties.Content = page.Content;
             properties.Embeds = page.Embeds;
-            properties.AllowedMentions = page.AllowedMentions;
             properties.Components = prompt.GetComponents(page);
-        }).ConfigureAwait(false);
+            properties.AllowedMentions = page.AllowedMentions;
+        }, options).ConfigureAwait(false);
         _ = RegisterAsync(message, prompt, timeout);
         return message;
     }
 
-    public async Task<IUserMessage> RespondAsync(IDiscordInteraction interaction, PaginationPromptBase prompt, TimeSpan? timeout = null) {
+    public async Task<IUserMessage> ModifyOriginalResponseAsync(
+        IDiscordInteraction interaction, PromptBase prompt, TimeSpan? timeout = null,
+        string? text = null, Embed[]? embeds = null, AllowedMentions? allowedMentions = null,
+        Embed? embed = null, RequestOptions? options = null) {
+        var message = await interaction.ModifyOriginalResponseAsync(properties => {
+            properties.Content = text;
+            properties.Embed = embed;
+            properties.Embeds = embeds;
+            properties.Components = prompt.Components;
+            properties.AllowedMentions = allowedMentions;
+        }, options).ConfigureAwait(false);
+        _ = RegisterAsync(message, prompt, timeout);
+        return message;
+    }
+
+    public async Task<IUserMessage> RespondAsync(
+        IDiscordInteraction interaction, PaginationPromptBase prompt, TimeSpan? timeout = null,
+        bool isTTS = false, bool ephemeral = false, RequestOptions? options = null) {
         var page = await prompt.GetPageAsync(prompt.CurrentPage).ConfigureAwait(false);
         await interaction.RespondAsync(
             page.Content,
             page.Embeds,
-            false,
-            false,
+            isTTS,
+            ephemeral,
             page.AllowedMentions,
-            prompt.GetComponents(page)).ConfigureAwait(false);
+            prompt.GetComponents(page),
+            null,
+            options).ConfigureAwait(false);
+        var message = await interaction.GetOriginalResponseAsync().ConfigureAwait(false);
+        _ = RegisterAsync(message, prompt, timeout);
+        return message;
+    }
+
+    public async Task<IUserMessage> RespondAsync(
+        IDiscordInteraction interaction, PromptBase prompt, TimeSpan? timeout = null,
+        string? text = null, Embed[]? embeds = null, bool isTTS = false, bool ephemeral = false,
+        AllowedMentions? allowedMentions = null, Embed? embed = null, RequestOptions? options = null) {
+        await interaction.RespondAsync(
+            text,
+            embeds,
+            isTTS,
+            ephemeral,
+            allowedMentions,
+            prompt.Components,
+            embed,
+            options).ConfigureAwait(false);
         var message = await interaction.GetOriginalResponseAsync().ConfigureAwait(false);
         _ = RegisterAsync(message, prompt, timeout);
         return message;
