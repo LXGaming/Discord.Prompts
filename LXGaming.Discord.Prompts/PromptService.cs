@@ -15,6 +15,8 @@ public class PromptService(
     private bool _disposed;
 
     public async Task<PromptResult> ExecuteAsync(IComponentInteraction interaction) {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
         if (!_promptTasks.TryGetValue(interaction.Message.Id, out var existingPromptTask)) {
             return new PromptResult {
                 Message = $"{interaction.Message.Id} is not registered",
@@ -39,6 +41,8 @@ public class PromptService(
     }
 
     public Task RegisterAsync(IUserMessage message, PromptBase prompt, TimeSpan? timeout = null, CancellationToken cancellationToken = default) {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
         if (_promptTasks.ContainsKey(message.Id)) {
             throw new InvalidOperationException("Message is already registered");
         }
@@ -89,6 +93,8 @@ public class PromptService(
     }
 
     public async Task<bool> UnregisterAsync(ulong key, bool stop = false) {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
         if (!_promptTasks.TryRemove(key, out var existingPromptTask)) {
             return false;
         }
