@@ -219,8 +219,8 @@ public class PromptService(
         }
 
         if (disposing) {
-            foreach (var key in _promptTasks.Keys) {
-                await UnregisterAsync(key).ConfigureAwait(false);
+            foreach (var pair in _promptTasks) {
+                await pair.Value.DisposeAsync().ConfigureAwait(false);
             }
         }
 
