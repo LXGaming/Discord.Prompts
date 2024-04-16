@@ -16,7 +16,7 @@ public abstract class PromptBase(
 
     public abstract Task<PromptResult> ExecuteAsync(IComponentInteraction interaction);
 
-    public bool IsValidUser(IUser user) {
+    public virtual bool IsValidUser(IUser user) {
         if (user.IsBot || user.IsWebhook) {
             return false;
         }
