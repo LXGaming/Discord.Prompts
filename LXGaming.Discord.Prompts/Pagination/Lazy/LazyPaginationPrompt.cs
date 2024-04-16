@@ -8,20 +8,27 @@ public class LazyPaginationPrompt(
     PromptMessage? cancelMessage,
     PromptMessage? expireMessage,
     Func<int, Task<PromptMessage>> action,
+    bool cachePages,
     int totalPages) : PaginationPromptBase(roleIds, userIds, cancelMessage, expireMessage) {
 
     public Func<int, Task<PromptMessage>> Action { get; } = action;
+
+    public ConcurrentDictionary<int, PromptMessage>? CachedPages { get; } = cachePages
+        ? new ConcurrentDictionary<int, PromptMessage>()
+        : null;
+
     public override int TotalPages { get; } = totalPages;
 
-    private readonly ConcurrentDictionary<int, PromptMessage> _cachedPages = new();
-
     public override async Task<PromptMessage> GetPageAsync(int index) {
-        if (_cachedPages.TryGetValue(index, out var existingPage)) {
+        if (CachedPages != null && CachedPages.TryGetValue(index, out var existingPage)) {
             return existingPage;
         }
 
         var page = await Action(index).ConfigureAwait(false);
-        _cachedPages[index] = page;
+        if (CachedPages != null) {
+            CachedPages[index] = page;
+        }
+
         return page;
     }
 }

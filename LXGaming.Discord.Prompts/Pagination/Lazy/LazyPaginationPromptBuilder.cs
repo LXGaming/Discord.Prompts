@@ -3,6 +3,7 @@
 public class LazyPaginationPromptBuilder : PromptBuilderBase<LazyPaginationPromptBuilder, LazyPaginationPrompt> {
 
     public Func<int, Task<PromptMessage>>? Action { get; set; }
+    public bool CachePages { get; set; } = true;
     public int TotalPages { get; set; }
 
     public override LazyPaginationPrompt Build() {
@@ -15,11 +16,17 @@ public class LazyPaginationPromptBuilder : PromptBuilderBase<LazyPaginationPromp
             CancelMessage,
             ExpireMessage,
             Action,
+            CachePages,
             TotalPages);
     }
 
     public LazyPaginationPromptBuilder WithAction(Func<int, Task<PromptMessage>>? action) {
         Action = action;
+        return this;
+    }
+
+    public LazyPaginationPromptBuilder WithCachePages(bool cachePages) {
+        CachePages = cachePages;
         return this;
     }
 
