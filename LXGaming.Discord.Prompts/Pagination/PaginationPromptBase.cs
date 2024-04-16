@@ -69,16 +69,8 @@ public abstract class PaginationPromptBase(
         }
 
         var componentBuilder = new ComponentBuilder();
-        Append(componentBuilder, page.Components);
-        Append(componentBuilder, Components);
+        DiscordUtils.AddRow(componentBuilder, page.Components);
+        DiscordUtils.AddRow(componentBuilder, Components);
         return componentBuilder.Build();
-    }
-
-    private static void Append(ComponentBuilder componentBuilder, MessageComponent messageComponent) {
-        foreach (var actionRowComponent in messageComponent.Components) {
-            var actionRowBuilder = new ActionRowBuilder();
-            actionRowBuilder.Components.AddRange(actionRowComponent.Components);
-            componentBuilder.AddRow(actionRowBuilder);
-        }
     }
 }
