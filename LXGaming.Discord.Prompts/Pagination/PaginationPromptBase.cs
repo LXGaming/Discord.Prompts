@@ -1,4 +1,5 @@
 ﻿using Discord;
+using LXGaming.Discord.Prompts.Utilities;
 
 namespace LXGaming.Discord.Prompts.Pagination;
 
@@ -15,6 +16,7 @@ public abstract class PaginationPromptBase(
         .WithButton("Next", "next", disabled: TotalPages < 2)
         .WithButton("Last", "last", disabled: TotalPages < 3)
         .Build();
+
     public int CurrentPage { get; private set; }
     public abstract int TotalPages { get; }
 
@@ -49,10 +51,11 @@ public abstract class PaginationPromptBase(
 
         var page = await GetPageAsync(CurrentPage).ConfigureAwait(false);
         await component.ModifyOriginalResponseAsync(properties => {
-            properties.Content = page.Content;
-            properties.Embeds = page.Embeds;
-            properties.Components = GetComponents(page);
-            properties.AllowedMentions = page.AllowedMentions;
+            properties.Content = DiscordUtils.CreateOptional(page.Content);
+            properties.Embeds = DiscordUtils.CreateOptional(page.Embeds);
+            properties.Components = DiscordUtils.CreateOptional(GetComponents(page));
+            properties.AllowedMentions = DiscordUtils.CreateOptional(page.AllowedMentions);
+            properties.Attachments = DiscordUtils.CreateOptional(page.Attachments);
         }).ConfigureAwait(false);
 
         return new PromptResult {

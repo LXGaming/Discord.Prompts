@@ -50,7 +50,8 @@ public class PromptService(
         return result;
     }
 
-    public Task RegisterAsync(IUserMessage message, PromptBase prompt, TimeSpan? timeout = null, CancellationToken cancellationToken = default) {
+    public Task RegisterAsync(IUserMessage message, PromptBase prompt, TimeSpan? timeout = null,
+        CancellationToken cancellationToken = default) {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
         if (_promptTasks.ContainsKey(message.Id)) {
@@ -93,10 +94,11 @@ public class PromptService(
                 await messageChannel.DeleteMessageAsync(messageId).ConfigureAwait(false);
             } else {
                 await messageChannel.ModifyMessageAsync(messageId, properties => {
-                    properties.Content = promptMessage.Content;
-                    properties.Embeds = promptMessage.Embeds;
-                    properties.Components = promptMessage.Components ?? new ComponentBuilder().Build();
-                    properties.AllowedMentions = promptMessage.AllowedMentions;
+                    properties.Content = DiscordUtils.CreateOptional(promptMessage.Content);
+                    properties.Embeds = DiscordUtils.CreateOptional(promptMessage.Embeds);
+                    properties.Components = DiscordUtils.CreateOptional(promptMessage.Components ?? new ComponentBuilder().Build());
+                    properties.AllowedMentions = DiscordUtils.CreateOptional(promptMessage.AllowedMentions);
+                    properties.Attachments = DiscordUtils.CreateOptional(promptMessage.Attachments);
                 }).ConfigureAwait(false);
             }
         }).ContinueWith(_ => UnregisterAsync(messageId), CancellationToken.None);
@@ -119,100 +121,98 @@ public class PromptService(
         return true;
     }
 
-    public async Task<IUserMessage> FollowupAsync(
-        IDiscordInteraction interaction, PaginationPromptBase prompt, TimeSpan? timeout = null,
-        bool isTTS = false, bool ephemeral = false, RequestOptions? options = null) {
+    public async Task<IUserMessage> FollowupAsync(IDiscordInteraction interaction, PaginationPromptBase prompt,
+        TimeSpan? timeout = null, bool isTTS = false, bool ephemeral = false, RequestOptions? options = null) {
         var page = await prompt.GetPageAsync(prompt.CurrentPage).ConfigureAwait(false);
-        var message = await interaction.FollowupAsync(
-            page.Content,
-            page.Embeds,
-            isTTS,
-            ephemeral,
-            page.AllowedMentions,
-            prompt.GetComponents(page),
-            null,
-            options).ConfigureAwait(false);
+        IUserMessage message;
+        if (page.Attachments != null) {
+            message = await interaction.FollowupWithFilesAsync(page.Attachments, page.Content, page.Embeds, isTTS,
+                ephemeral, page.AllowedMentions, prompt.GetComponents(page), null, options).ConfigureAwait(false);
+        } else {
+            message = await interaction.FollowupAsync(page.Content, page.Embeds, isTTS, ephemeral, page.AllowedMentions,
+                prompt.GetComponents(page), null, options).ConfigureAwait(false);
+        }
+
         _ = RegisterAsync(message, prompt, timeout);
         return message;
     }
 
-    public async Task<IUserMessage> FollowupAsync(
-        IDiscordInteraction interaction, PromptBase prompt, TimeSpan? timeout = null,
-        string? text = null, Embed[]? embeds = null, bool isTTS = false, bool ephemeral = false,
-        AllowedMentions? allowedMentions = null, Embed? embed = null, RequestOptions? options = null) {
-        var message = await interaction.FollowupAsync(
-            text,
-            embeds,
-            isTTS,
-            ephemeral,
-            allowedMentions,
-            prompt.Components,
-            embed,
-            options).ConfigureAwait(false);
-        _ = RegisterAsync(message, prompt, timeout);
-        return message;
-    }
-
-    public async Task<IUserMessage> ModifyOriginalResponseAsync(
-        IDiscordInteraction interaction, PaginationPromptBase prompt, TimeSpan? timeout = null,
-        RequestOptions? options = null) {
-        var page = await prompt.GetPageAsync(prompt.CurrentPage).ConfigureAwait(false);
-        var message = await interaction.ModifyOriginalResponseAsync(properties => {
-            properties.Content = page.Content;
-            properties.Embeds = page.Embeds;
-            properties.Components = prompt.GetComponents(page);
-            properties.AllowedMentions = page.AllowedMentions;
-        }, options).ConfigureAwait(false);
-        _ = RegisterAsync(message, prompt, timeout);
-        return message;
-    }
-
-    public async Task<IUserMessage> ModifyOriginalResponseAsync(
-        IDiscordInteraction interaction, PromptBase prompt, TimeSpan? timeout = null,
-        string? text = null, Embed[]? embeds = null, AllowedMentions? allowedMentions = null,
+    public async Task<IUserMessage> FollowupAsync(IDiscordInteraction interaction, PromptBase prompt,
+        TimeSpan? timeout = null, IEnumerable<FileAttachment>? attachments = null, string? text = null,
+        Embed[]? embeds = null, bool isTTS = false, bool ephemeral = false, AllowedMentions? allowedMentions = null,
         Embed? embed = null, RequestOptions? options = null) {
+        IUserMessage message;
+        if (attachments != null) {
+            message = await interaction.FollowupWithFilesAsync(attachments, text, embeds, isTTS, ephemeral,
+                allowedMentions, prompt.Components, embed, options).ConfigureAwait(false);
+        } else {
+            message = await interaction.FollowupAsync(text, embeds, isTTS, ephemeral, allowedMentions,
+                prompt.Components, embed, options).ConfigureAwait(false);
+        }
+
+        _ = RegisterAsync(message, prompt, timeout);
+        return message;
+    }
+
+    public async Task<IUserMessage> ModifyOriginalResponseAsync(IDiscordInteraction interaction,
+        PaginationPromptBase prompt, TimeSpan? timeout = null, RequestOptions? options = null) {
+        var page = await prompt.GetPageAsync(prompt.CurrentPage).ConfigureAwait(false);
         var message = await interaction.ModifyOriginalResponseAsync(properties => {
-            properties.Content = text;
-            properties.Embed = embed;
-            properties.Embeds = embeds;
-            properties.Components = prompt.Components;
-            properties.AllowedMentions = allowedMentions;
+            properties.Content = DiscordUtils.CreateOptional(page.Content);
+            properties.Embeds = DiscordUtils.CreateOptional(page.Embeds);
+            properties.Components = DiscordUtils.CreateOptional(prompt.GetComponents(page));
+            properties.AllowedMentions = DiscordUtils.CreateOptional(page.AllowedMentions);
+            properties.Attachments = DiscordUtils.CreateOptional(page.Attachments);
         }, options).ConfigureAwait(false);
         _ = RegisterAsync(message, prompt, timeout);
         return message;
     }
 
-    public async Task<IUserMessage> RespondAsync(
-        IDiscordInteraction interaction, PaginationPromptBase prompt, TimeSpan? timeout = null,
-        bool isTTS = false, bool ephemeral = false, RequestOptions? options = null) {
+    public async Task<IUserMessage> ModifyOriginalResponseAsync(IDiscordInteraction interaction, PromptBase prompt,
+        TimeSpan? timeout = null, IEnumerable<FileAttachment>? attachments = null, string? text = null,
+        Embed[]? embeds = null, AllowedMentions? allowedMentions = null, Embed? embed = null,
+        RequestOptions? options = null) {
+        var message = await interaction.ModifyOriginalResponseAsync(properties => {
+            properties.Content = DiscordUtils.CreateOptional(text);
+            properties.Embed = DiscordUtils.CreateOptional(embed);
+            properties.Embeds = DiscordUtils.CreateOptional(embeds);
+            properties.Components = DiscordUtils.CreateOptional(prompt.Components);
+            properties.AllowedMentions = DiscordUtils.CreateOptional(allowedMentions);
+            properties.Attachments = DiscordUtils.CreateOptional(attachments);
+        }, options).ConfigureAwait(false);
+        _ = RegisterAsync(message, prompt, timeout);
+        return message;
+    }
+
+    public async Task<IUserMessage> RespondAsync(IDiscordInteraction interaction, PaginationPromptBase prompt,
+        TimeSpan? timeout = null, bool isTTS = false,
+        bool ephemeral = false, RequestOptions? options = null) {
         var page = await prompt.GetPageAsync(prompt.CurrentPage).ConfigureAwait(false);
-        await interaction.RespondAsync(
-            page.Content,
-            page.Embeds,
-            isTTS,
-            ephemeral,
-            page.AllowedMentions,
-            prompt.GetComponents(page),
-            null,
-            options).ConfigureAwait(false);
+        if (page.Attachments != null) {
+            await interaction.RespondWithFilesAsync(page.Attachments, page.Content, page.Embeds, isTTS, ephemeral,
+                page.AllowedMentions, prompt.GetComponents(page), null, options).ConfigureAwait(false);
+        } else {
+            await interaction.RespondAsync(page.Content, page.Embeds, isTTS, ephemeral, page.AllowedMentions,
+                prompt.GetComponents(page), null, options).ConfigureAwait(false);
+        }
+
         var message = await interaction.GetOriginalResponseAsync().ConfigureAwait(false);
         _ = RegisterAsync(message, prompt, timeout);
         return message;
     }
 
-    public async Task<IUserMessage> RespondAsync(
-        IDiscordInteraction interaction, PromptBase prompt, TimeSpan? timeout = null,
-        string? text = null, Embed[]? embeds = null, bool isTTS = false, bool ephemeral = false,
-        AllowedMentions? allowedMentions = null, Embed? embed = null, RequestOptions? options = null) {
-        await interaction.RespondAsync(
-            text,
-            embeds,
-            isTTS,
-            ephemeral,
-            allowedMentions,
-            prompt.Components,
-            embed,
-            options).ConfigureAwait(false);
+    public async Task<IUserMessage> RespondAsync(IDiscordInteraction interaction, PromptBase prompt,
+        TimeSpan? timeout = null, IEnumerable<FileAttachment>? attachments = null, string? text = null,
+        Embed[]? embeds = null, bool isTTS = false, bool ephemeral = false, AllowedMentions? allowedMentions = null,
+        Embed? embed = null, RequestOptions? options = null) {
+        if (attachments != null) {
+            await interaction.RespondWithFilesAsync(attachments, text, embeds, isTTS, ephemeral, allowedMentions,
+                prompt.Components, embed, options).ConfigureAwait(false);
+        } else {
+            await interaction.RespondAsync(text, embeds, isTTS, ephemeral, allowedMentions, prompt.Components, embed,
+                options).ConfigureAwait(false);
+        }
+
         var message = await interaction.GetOriginalResponseAsync().ConfigureAwait(false);
         _ = RegisterAsync(message, prompt, timeout);
         return message;

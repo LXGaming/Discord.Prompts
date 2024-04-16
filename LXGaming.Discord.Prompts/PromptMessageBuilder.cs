@@ -5,17 +5,28 @@ namespace LXGaming.Discord.Prompts;
 public sealed class PromptMessageBuilder {
 
     public AllowedMentions? AllowedMentions { get; set; }
+    public List<FileAttachment>? Attachments { get; set; }
     public MessageComponent? Components { get; set; }
     public string? Content { get; set; }
     public bool? Delete { get; set; }
     public List<Embed>? Embeds { get; set; }
 
     public PromptMessage Build() {
-        return new PromptMessage(AllowedMentions, Components, Content, Delete, Embeds?.ToArray());
+        return new PromptMessage(AllowedMentions, Attachments, Components, Content, Delete, Embeds?.ToArray());
     }
 
     public PromptMessageBuilder WithAllowedMentions(AllowedMentions? allowedMentions) {
         AllowedMentions = allowedMentions;
+        return this;
+    }
+
+    public PromptMessageBuilder WithAttachments(params FileAttachment[] attachments) {
+        if (attachments.Length == 0) {
+            return this;
+        }
+
+        Attachments ??= [];
+        Attachments.AddRange(attachments);
         return this;
     }
 
