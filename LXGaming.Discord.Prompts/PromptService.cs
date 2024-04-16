@@ -32,7 +32,17 @@ public class PromptService(
             };
         }
 
-        var result = await prompt.ExecuteAsync(interaction).ConfigureAwait(false);
+        PromptResult result;
+        try {
+            result = await prompt.ExecuteAsync(interaction).ConfigureAwait(false);
+        } catch (Exception ex) {
+            return new PromptResult {
+                Exception = ex,
+                Message = ex.Message,
+                Status = PromptStatus.Exception
+            };
+        }
+
         if (result.Unregister) {
             await UnregisterAsync(interaction.Message.Id, true).ConfigureAwait(false);
         }
