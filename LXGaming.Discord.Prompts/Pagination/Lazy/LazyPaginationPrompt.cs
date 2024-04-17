@@ -3,8 +3,8 @@
 namespace LXGaming.Discord.Prompts.Pagination.Lazy;
 
 public class LazyPaginationPrompt(
-    ulong[] roleIds,
-    ulong[] userIds,
+    IReadOnlyCollection<ulong> roleIds,
+    IReadOnlyCollection<ulong> userIds,
     Func<PromptMessage>? cancelMessage,
     Func<PromptMessage>? expireMessage,
     Func<int, Task<PromptMessage>> action,

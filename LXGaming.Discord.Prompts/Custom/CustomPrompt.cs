@@ -3,8 +3,8 @@
 namespace LXGaming.Discord.Prompts.Custom;
 
 public class CustomPrompt(
-    ulong[] roleIds,
-    ulong[] userIds,
+    IReadOnlyCollection<ulong> roleIds,
+    IReadOnlyCollection<ulong> userIds,
     Func<PromptMessage>? cancelMessage,
     Func<PromptMessage>? expireMessage,
     MessageComponent components,

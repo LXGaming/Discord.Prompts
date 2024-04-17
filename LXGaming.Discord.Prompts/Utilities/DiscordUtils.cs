@@ -1,4 +1,5 @@
-﻿using Discord;
+﻿using System.Collections.Immutable;
+using Discord;
 
 namespace LXGaming.Discord.Prompts.Utilities;
 
@@ -10,6 +11,10 @@ public static class DiscordUtils {
             actionRowBuilder.Components.AddRange(actionRowComponent.Components);
             componentBuilder.AddRow(actionRowBuilder);
         }
+    }
+
+    public static ImmutableHashSet<ulong> CreateImmutableHashSet(IEnumerable<IEntity<ulong>>? entities) {
+        return entities?.Select(entity => entity.Id).ToImmutableHashSet() ?? ImmutableHashSet<ulong>.Empty;
     }
 
     public static Optional<T> CreateOptional<T>(T? value) {

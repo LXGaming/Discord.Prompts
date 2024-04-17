@@ -4,8 +4,8 @@ using LXGaming.Discord.Prompts.Utilities;
 namespace LXGaming.Discord.Prompts.Pagination;
 
 public abstract class PaginationPromptBase(
-    ulong[] roleIds,
-    ulong[] userIds,
+    IReadOnlyCollection<ulong> roleIds,
+    IReadOnlyCollection<ulong> userIds,
     Func<PromptMessage>? cancelMessage,
     Func<PromptMessage>? expireMessage) : PromptBase(roleIds, userIds, cancelMessage, expireMessage) {
 

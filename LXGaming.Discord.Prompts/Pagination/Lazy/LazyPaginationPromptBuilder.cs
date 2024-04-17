@@ -1,4 +1,6 @@
-﻿namespace LXGaming.Discord.Prompts.Pagination.Lazy;
+﻿using LXGaming.Discord.Prompts.Utilities;
+
+namespace LXGaming.Discord.Prompts.Pagination.Lazy;
 
 public class LazyPaginationPromptBuilder : PromptBuilderBase<LazyPaginationPromptBuilder, LazyPaginationPrompt> {
 
@@ -10,14 +12,8 @@ public class LazyPaginationPromptBuilder : PromptBuilderBase<LazyPaginationPromp
         if (Action == null) { throw new InvalidOperationException(nameof(Action)); }
         if (TotalPages <= 0) { throw new IndexOutOfRangeException(nameof(TotalPages)); }
 
-        return new LazyPaginationPrompt(
-            Roles?.Select(role => role.Id).ToArray() ?? Array.Empty<ulong>(),
-            Users?.Select(user => user.Id).ToArray() ?? Array.Empty<ulong>(),
-            CancelMessage,
-            ExpireMessage,
-            Action,
-            CachePages,
-            TotalPages);
+        return new LazyPaginationPrompt(DiscordUtils.CreateImmutableHashSet(Roles),
+            DiscordUtils.CreateImmutableHashSet(Users), CancelMessage, ExpireMessage, Action, CachePages, TotalPages);
     }
 
     public LazyPaginationPromptBuilder WithAction(Func<int, Task<PromptMessage>>? action) {

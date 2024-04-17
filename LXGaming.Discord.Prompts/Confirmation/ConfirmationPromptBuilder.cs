@@ -1,4 +1,5 @@
 ﻿using Discord;
+using LXGaming.Discord.Prompts.Utilities;
 
 namespace LXGaming.Discord.Prompts.Confirmation;
 
@@ -15,13 +16,8 @@ public class ConfirmationPromptBuilder : PromptBuilderBase<ConfirmationPromptBui
             .WithButton("No", ConfirmationPrompt.FalseKey, ButtonStyle.Danger)
             .Build();
 
-        return new ConfirmationPrompt(
-            Roles?.Select(role => role.Id).ToArray() ?? Array.Empty<ulong>(),
-            Users?.Select(user => user.Id).ToArray() ?? Array.Empty<ulong>(),
-            CancelMessage,
-            ExpireMessage,
-            Components,
-            Action);
+        return new ConfirmationPrompt(DiscordUtils.CreateImmutableHashSet(Roles),
+            DiscordUtils.CreateImmutableHashSet(Users), CancelMessage, ExpireMessage, Components, Action);
     }
 
     public ConfirmationPromptBuilder WithComponents(MessageComponent? components) {

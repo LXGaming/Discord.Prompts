@@ -1,4 +1,5 @@
 ﻿using Discord;
+using LXGaming.Discord.Prompts.Utilities;
 
 namespace LXGaming.Discord.Prompts.Custom;
 
@@ -11,13 +12,8 @@ public class CustomPromptBuilder : PromptBuilderBase<CustomPromptBuilder, Custom
         if (Components == null) { throw new InvalidOperationException(nameof(Components)); }
         if (Action == null) { throw new InvalidOperationException(nameof(Action)); }
 
-        return new CustomPrompt(
-            Roles?.Select(role => role.Id).ToArray() ?? Array.Empty<ulong>(),
-            Users?.Select(user => user.Id).ToArray() ?? Array.Empty<ulong>(),
-            CancelMessage,
-            ExpireMessage,
-            Components,
-            Action);
+        return new CustomPrompt(DiscordUtils.CreateImmutableHashSet(Roles),
+            DiscordUtils.CreateImmutableHashSet(Users), CancelMessage, ExpireMessage, Components, Action);
     }
 
     public CustomPromptBuilder WithComponents(MessageComponent? components) {

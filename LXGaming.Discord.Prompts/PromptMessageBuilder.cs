@@ -1,18 +1,20 @@
-﻿using Discord;
+﻿using System.Collections.Immutable;
+using Discord;
 
 namespace LXGaming.Discord.Prompts;
 
 public sealed class PromptMessageBuilder {
 
     public AllowedMentions? AllowedMentions { get; set; }
-    public List<FileAttachment>? Attachments { get; set; }
+    public IList<FileAttachment>? Attachments { get; set; }
     public MessageComponent? Components { get; set; }
     public string? Content { get; set; }
     public bool? Delete { get; set; }
-    public List<Embed>? Embeds { get; set; }
+    public IList<Embed>? Embeds { get; set; }
 
     public PromptMessage Build() {
-        return new PromptMessage(AllowedMentions, Attachments, Components, Content, Delete, Embeds?.ToArray());
+        return new PromptMessage(AllowedMentions, Attachments?.ToImmutableList(), Components, Content, Delete,
+            Embeds?.ToArray());
     }
 
     public PromptMessageBuilder WithAllowedMentions(AllowedMentions? allowedMentions) {
@@ -21,12 +23,20 @@ public sealed class PromptMessageBuilder {
     }
 
     public PromptMessageBuilder WithAttachments(params FileAttachment[] attachments) {
-        if (attachments.Length == 0) {
-            return this;
+        return WithAttachments((IEnumerable<FileAttachment>) attachments);
+    }
+
+    public PromptMessageBuilder WithAttachments(IEnumerable<FileAttachment> attachments) {
+        foreach (var attachment in attachments) {
+            WithAttachment(attachment);
         }
 
-        Attachments ??= [];
-        Attachments.AddRange(attachments);
+        return this;
+    }
+
+    public PromptMessageBuilder WithAttachment(FileAttachment attachment) {
+        Attachments ??= new List<FileAttachment>();
+        Attachments.Add(attachment);
         return this;
     }
 
@@ -46,12 +56,20 @@ public sealed class PromptMessageBuilder {
     }
 
     public PromptMessageBuilder WithEmbeds(params Embed[] embeds) {
-        if (embeds.Length == 0) {
-            return this;
+        return WithEmbeds((IEnumerable<Embed>) embeds);
+    }
+
+    public PromptMessageBuilder WithEmbeds(IEnumerable<Embed> embeds) {
+        foreach (var embed in embeds) {
+            WithEmbed(embed);
         }
 
-        Embeds ??= [];
-        Embeds.AddRange(embeds);
+        return this;
+    }
+
+    public PromptMessageBuilder WithEmbed(Embed embed) {
+        Embeds ??= new List<Embed>();
+        Embeds.Add(embed);
         return this;
     }
 }

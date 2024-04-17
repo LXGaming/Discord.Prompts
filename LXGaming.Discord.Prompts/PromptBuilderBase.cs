@@ -10,14 +10,14 @@ public abstract class PromptBuilderBase<TPromptBuilder, TPrompt>
     public ISet<IUser>? Users { get; set; }
 
     public Func<PromptMessage>? CancelMessage { get; set; } = () => new PromptMessageBuilder()
-        .WithEmbeds(new EmbedBuilder()
+        .WithEmbed(new EmbedBuilder()
             .WithColor(Color.Red)
             .WithFooter("Cancelled")
             .Build())
         .Build();
 
     public Func<PromptMessage>? ExpireMessage { get; set; } = () => new PromptMessageBuilder()
-        .WithEmbeds(new EmbedBuilder()
+        .WithEmbed(new EmbedBuilder()
             .WithColor(Color.Orange)
             .WithFooter("Expired")
             .Build())
@@ -26,28 +26,38 @@ public abstract class PromptBuilderBase<TPromptBuilder, TPrompt>
     public abstract TPrompt Build();
 
     public TPromptBuilder WithRoles(params IRole[] roles) {
-        if (roles.Length == 0) {
-            return (TPromptBuilder) this;
-        }
+        return WithRoles((IEnumerable<IRole>) roles);
+    }
 
-        Roles ??= new HashSet<IRole>();
+    public TPromptBuilder WithRoles(IEnumerable<IRole> roles) {
         foreach (var role in roles) {
-            Roles.Add(role);
+            WithRole(role);
         }
 
         return (TPromptBuilder) this;
     }
 
+    public TPromptBuilder WithRole(IRole role) {
+        Roles ??= new HashSet<IRole>();
+        Roles.Add(role);
+        return (TPromptBuilder) this;
+    }
+
     public TPromptBuilder WithUsers(params IUser[] users) {
-        if (users.Length == 0) {
-            return (TPromptBuilder) this;
-        }
+        return WithUsers((IEnumerable<IUser>) users);
+    }
 
-        Users ??= new HashSet<IUser>();
+    public TPromptBuilder WithUsers(IEnumerable<IUser> users) {
         foreach (var user in users) {
-            Users.Add(user);
+            WithUser(user);
         }
 
+        return (TPromptBuilder) this;
+    }
+
+    public TPromptBuilder WithUser(IUser user) {
+        Users ??= new HashSet<IUser>();
+        Users.Add(user);
         return (TPromptBuilder) this;
     }
 
