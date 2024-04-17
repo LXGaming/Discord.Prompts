@@ -5,8 +5,8 @@ namespace LXGaming.Discord.Prompts.Pagination.Lazy;
 public class LazyPaginationPrompt(
     ulong[] roleIds,
     ulong[] userIds,
-    PromptMessage? cancelMessage,
-    PromptMessage? expireMessage,
+    Func<PromptMessage>? cancelMessage,
+    Func<PromptMessage>? expireMessage,
     Func<int, Task<PromptMessage>> action,
     bool cachePages,
     int totalPages) : PaginationPromptBase(roleIds, userIds, cancelMessage, expireMessage) {

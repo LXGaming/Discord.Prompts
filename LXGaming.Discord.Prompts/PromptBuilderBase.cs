@@ -8,13 +8,15 @@ public abstract class PromptBuilderBase<TPromptBuilder, TPrompt>
 
     public ISet<IRole>? Roles { get; set; }
     public ISet<IUser>? Users { get; set; }
-    public PromptMessage? CancelMessage { get; set; } = new PromptMessageBuilder()
+
+    public Func<PromptMessage>? CancelMessage { get; set; } = () => new PromptMessageBuilder()
         .WithEmbeds(new EmbedBuilder()
             .WithColor(Color.Red)
             .WithFooter("Cancelled")
             .Build())
         .Build();
-    public PromptMessage? ExpireMessage { get; set; } = new PromptMessageBuilder()
+
+    public Func<PromptMessage>? ExpireMessage { get; set; } = () => new PromptMessageBuilder()
         .WithEmbeds(new EmbedBuilder()
             .WithColor(Color.Orange)
             .WithFooter("Expired")
@@ -49,12 +51,32 @@ public abstract class PromptBuilderBase<TPromptBuilder, TPrompt>
         return (TPromptBuilder) this;
     }
 
-    public TPromptBuilder WithCancelMessage(PromptMessage? cancelMessage) {
+    public TPromptBuilder WithCancelMessage(AllowedMentions? allowedMentions = null,
+        IEnumerable<FileAttachment>? attachments = null, MessageComponent? components = null, string? content = null,
+        params Embed[]? embeds) {
+        return WithCancelMessage(new PromptMessage(allowedMentions, attachments, components, content, false, embeds));
+    }
+
+    public TPromptBuilder WithCancelMessage(PromptMessage cancelMessage) {
+        return WithCancelMessage(() => cancelMessage);
+    }
+
+    public TPromptBuilder WithCancelMessage(Func<PromptMessage>? cancelMessage) {
         CancelMessage = cancelMessage;
         return (TPromptBuilder) this;
     }
 
-    public TPromptBuilder WithExpireMessage(PromptMessage? expireMessage) {
+    public TPromptBuilder WithExpireMessage(AllowedMentions? allowedMentions = null,
+        IEnumerable<FileAttachment>? attachments = null, MessageComponent? components = null, string? content = null,
+        params Embed[]? embeds) {
+        return WithExpireMessage(new PromptMessage(allowedMentions, attachments, components, content, false, embeds));
+    }
+
+    public TPromptBuilder WithExpireMessage(PromptMessage expireMessage) {
+        return WithExpireMessage(() => expireMessage);
+    }
+
+    public TPromptBuilder WithExpireMessage(Func<PromptMessage>? expireMessage) {
         ExpireMessage = expireMessage;
         return (TPromptBuilder) this;
     }

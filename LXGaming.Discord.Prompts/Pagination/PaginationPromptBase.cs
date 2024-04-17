@@ -6,8 +6,8 @@ namespace LXGaming.Discord.Prompts.Pagination;
 public abstract class PaginationPromptBase(
     ulong[] roleIds,
     ulong[] userIds,
-    PromptMessage? cancelMessage,
-    PromptMessage? expireMessage) : PromptBase(roleIds, userIds, cancelMessage, expireMessage) {
+    Func<PromptMessage>? cancelMessage,
+    Func<PromptMessage>? expireMessage) : PromptBase(roleIds, userIds, cancelMessage, expireMessage) {
 
     public override MessageComponent Components => new ComponentBuilder()
         .WithButton("First", "first", disabled: TotalPages < 3)

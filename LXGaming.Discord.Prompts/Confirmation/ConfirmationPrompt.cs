@@ -5,8 +5,8 @@ namespace LXGaming.Discord.Prompts.Confirmation;
 public class ConfirmationPrompt(
     ulong[] roleIds,
     ulong[] userIds,
-    PromptMessage? cancelMessage,
-    PromptMessage? expireMessage,
+    Func<PromptMessage>? cancelMessage,
+    Func<PromptMessage>? expireMessage,
     MessageComponent components,
     Func<IComponentInteraction, bool, Task<bool>> action) : PromptBase(roleIds, userIds, cancelMessage, expireMessage) {
 

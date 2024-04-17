@@ -84,8 +84,8 @@ public class PromptService(
             }
 
             var promptMessage = cancellationTokenSource.IsCancellationRequested
-                ? promptTask.Prompt.CancelMessage
-                : promptTask.Prompt.ExpireMessage;
+                ? promptTask.Prompt.CancelMessage?.Invoke()
+                : promptTask.Prompt.ExpireMessage?.Invoke();
             if (promptMessage == null) {
                 return;
             }
