@@ -17,7 +17,8 @@ public class ConfirmationPromptBuilder : PromptBuilderBase<ConfirmationPromptBui
             .Build();
 
         return new ConfirmationPrompt(DiscordUtils.CreateImmutableHashSet(Roles),
-            DiscordUtils.CreateImmutableHashSet(Users), CancelMessage, ExpireMessage, Components, Action);
+            DiscordUtils.CreateImmutableHashSet(Users), CancelMessage, ExpireMessage, InvalidUserMessage,
+            Components, Action);
     }
 
     public ConfirmationPromptBuilder WithComponents(MessageComponent? components) {

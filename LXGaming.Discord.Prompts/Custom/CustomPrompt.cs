@@ -7,8 +7,10 @@ public class CustomPrompt(
     IReadOnlyCollection<ulong> userIds,
     Func<PromptMessage>? cancelMessage,
     Func<PromptMessage>? expireMessage,
+    Func<PromptMessage>? invalidUserMessage,
     MessageComponent components,
-    Func<IComponentInteraction, Task<bool>> action) : PromptBase(roleIds, userIds, cancelMessage, expireMessage) {
+    Func<IComponentInteraction, Task<bool>> action)
+    : PromptBase(roleIds, userIds, cancelMessage, expireMessage, invalidUserMessage) {
 
     public override MessageComponent Components { get; } = components;
     public Func<IComponentInteraction, Task<bool>> Action { get; } = action;

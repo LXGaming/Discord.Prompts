@@ -23,6 +23,10 @@ public abstract class PromptBuilderBase<TPromptBuilder, TPrompt>
             .Build())
         .Build();
 
+    public Func<PromptMessage>? InvalidUserMessage { get; set; } = () => new PromptMessageBuilder()
+        .WithContent("You do not have permission to interact with this prompt")
+        .Build();
+
     public abstract TPrompt Build();
 
     public TPromptBuilder WithRoles(params IRole[] roles) {
@@ -88,6 +92,21 @@ public abstract class PromptBuilderBase<TPromptBuilder, TPrompt>
 
     public TPromptBuilder WithExpireMessage(Func<PromptMessage>? expireMessage) {
         ExpireMessage = expireMessage;
+        return (TPromptBuilder) this;
+    }
+
+    public TPromptBuilder WithInvalidUserMessage(AllowedMentions? allowedMentions = null,
+        IEnumerable<FileAttachment>? attachments = null, MessageComponent? components = null, string? content = null,
+        params Embed[]? embeds) {
+        return WithInvalidUserMessage(new PromptMessage(allowedMentions, attachments, components, content, false, embeds));
+    }
+
+    public TPromptBuilder WithInvalidUserMessage(PromptMessage invalidUserMessage) {
+        return WithInvalidUserMessage(() => invalidUserMessage);
+    }
+
+    public TPromptBuilder WithInvalidUserMessage(Func<PromptMessage>? invalidUserMessage) {
+        InvalidUserMessage = invalidUserMessage;
         return (TPromptBuilder) this;
     }
 }

@@ -28,6 +28,13 @@ public class PromptService(
         try {
             var prompt = existingPromptTask.Prompt;
             if (!prompt.IsValidUser(interaction.User)) {
+                var invalidUserMessage = prompt.InvalidUserMessage?.Invoke();
+                if (invalidUserMessage != null) {
+                    await RespondAsync(interaction, invalidUserMessage.Attachments, invalidUserMessage.Content,
+                        invalidUserMessage.Embeds, false, true, invalidUserMessage.AllowedMentions,
+                        invalidUserMessage.Components).ConfigureAwait(false);
+                }
+
                 return new PromptResult {
                     Message = $"{interaction.User.Id} is not valid",
                     Status = PromptStatus.InvalidUser

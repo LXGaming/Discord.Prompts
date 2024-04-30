@@ -7,7 +7,9 @@ public abstract class PaginationPromptBase(
     IReadOnlyCollection<ulong> roleIds,
     IReadOnlyCollection<ulong> userIds,
     Func<PromptMessage>? cancelMessage,
-    Func<PromptMessage>? expireMessage) : PromptBase(roleIds, userIds, cancelMessage, expireMessage) {
+    Func<PromptMessage>? expireMessage,
+    Func<PromptMessage>? invalidUserMessage)
+    : PromptBase(roleIds, userIds, cancelMessage, expireMessage, invalidUserMessage) {
 
     public override MessageComponent Components => new ComponentBuilder()
         .WithButton("First", "first", disabled: TotalPages < 3)

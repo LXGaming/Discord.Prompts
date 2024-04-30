@@ -7,9 +7,10 @@ public class LazyPaginationPrompt(
     IReadOnlyCollection<ulong> userIds,
     Func<PromptMessage>? cancelMessage,
     Func<PromptMessage>? expireMessage,
+    Func<PromptMessage>? invalidUserMessage,
     Func<int, Task<PromptMessage>> action,
     bool cachePages,
-    int totalPages) : PaginationPromptBase(roleIds, userIds, cancelMessage, expireMessage) {
+    int totalPages) : PaginationPromptBase(roleIds, userIds, cancelMessage, expireMessage, invalidUserMessage) {
 
     public Func<int, Task<PromptMessage>> Action { get; } = action;
 

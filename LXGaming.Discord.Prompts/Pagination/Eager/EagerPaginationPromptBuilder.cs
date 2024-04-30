@@ -13,7 +13,8 @@ public class EagerPaginationPromptBuilder : PromptBuilderBase<EagerPaginationPro
         if (Pages.Count <= 0) { throw new IndexOutOfRangeException(nameof(Pages)); }
 
         return new EagerPaginationPrompt(DiscordUtils.CreateImmutableHashSet(Roles),
-            DiscordUtils.CreateImmutableHashSet(Users), CancelMessage, ExpireMessage, Pages.ToImmutableList());
+            DiscordUtils.CreateImmutableHashSet(Users), CancelMessage, ExpireMessage, InvalidUserMessage,
+            Pages.ToImmutableList());
     }
 
     public EagerPaginationPromptBuilder WithPages(params PromptMessage[] pages) {

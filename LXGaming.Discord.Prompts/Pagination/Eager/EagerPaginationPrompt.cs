@@ -5,7 +5,9 @@ public class EagerPaginationPrompt(
     IReadOnlyCollection<ulong> userIds,
     Func<PromptMessage>? cancelMessage,
     Func<PromptMessage>? expireMessage,
-    IReadOnlyList<PromptMessage> pages) : PaginationPromptBase(roleIds, userIds, cancelMessage, expireMessage) {
+    Func<PromptMessage>? invalidUserMessage,
+    IReadOnlyList<PromptMessage> pages)
+    : PaginationPromptBase(roleIds, userIds, cancelMessage, expireMessage, invalidUserMessage) {
 
     public IReadOnlyList<PromptMessage> Pages { get; } = pages;
     public override int TotalPages => Pages.Count;

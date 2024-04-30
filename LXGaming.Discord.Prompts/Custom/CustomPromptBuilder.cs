@@ -13,7 +13,7 @@ public class CustomPromptBuilder : PromptBuilderBase<CustomPromptBuilder, Custom
         if (Action == null) { throw new InvalidOperationException(nameof(Action)); }
 
         return new CustomPrompt(DiscordUtils.CreateImmutableHashSet(Roles),
-            DiscordUtils.CreateImmutableHashSet(Users), CancelMessage, ExpireMessage, Components, Action);
+            DiscordUtils.CreateImmutableHashSet(Users), CancelMessage, ExpireMessage, InvalidUserMessage, Components, Action);
     }
 
     public CustomPromptBuilder WithComponents(MessageComponent? components) {

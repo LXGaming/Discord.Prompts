@@ -7,8 +7,10 @@ public class ConfirmationPrompt(
     IReadOnlyCollection<ulong> userIds,
     Func<PromptMessage>? cancelMessage,
     Func<PromptMessage>? expireMessage,
+    Func<PromptMessage>? invalidUserMessage,
     MessageComponent components,
-    Func<IComponentInteraction, bool, Task<bool>> action) : PromptBase(roleIds, userIds, cancelMessage, expireMessage) {
+    Func<IComponentInteraction, bool, Task<bool>> action)
+    : PromptBase(roleIds, userIds, cancelMessage, expireMessage, invalidUserMessage) {
 
     public const string FalseKey = "false";
     public const string TrueKey = "true";
