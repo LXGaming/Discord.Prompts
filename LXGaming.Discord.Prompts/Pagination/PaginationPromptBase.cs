@@ -47,9 +47,12 @@ public abstract class PaginationPromptBase(
             };
         }
 
-        await component.DeferAsync().ConfigureAwait(false);
+        var deferTask = component.DeferAsync();
+        var pageTask = GetPageAsync(CurrentPage);
 
-        var page = await GetPageAsync(CurrentPage).ConfigureAwait(false);
+        await Task.WhenAll(deferTask, pageTask).ConfigureAwait(false);
+
+        var page = await pageTask.ConfigureAwait(false);
         await component.ModifyOriginalResponseAsync(properties => {
             properties.Content = DiscordUtils.CreateOptional(page.Content);
             properties.Embeds = DiscordUtils.CreateOptional(page.Embeds);
