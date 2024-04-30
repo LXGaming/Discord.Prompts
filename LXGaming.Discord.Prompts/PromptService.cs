@@ -24,16 +24,16 @@ public class PromptService(
             };
         }
 
-        var prompt = existingPromptTask.Prompt;
-        if (!prompt.IsValidUser(interaction.User)) {
-            return new PromptResult {
-                Message = $"{interaction.User.Id} is not valid",
-                Status = PromptStatus.InvalidUser
-            };
-        }
-
         PromptResult result;
         try {
+            var prompt = existingPromptTask.Prompt;
+            if (!prompt.IsValidUser(interaction.User)) {
+                return new PromptResult {
+                    Message = $"{interaction.User.Id} is not valid",
+                    Status = PromptStatus.InvalidUser
+                };
+            }
+
             result = await prompt.ExecuteAsync(interaction).ConfigureAwait(false);
         } catch (Exception ex) {
             return new PromptResult {
