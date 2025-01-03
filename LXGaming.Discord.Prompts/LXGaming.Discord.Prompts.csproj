@@ -12,7 +12,7 @@
     <Product>Discord Prompts</Product>
     <Copyright>© Alex Thomson. All rights reserved.</Copyright>
     <Title>Discord Prompts</Title>
-    <Description>Prompt Service for Discord.Net</Description>
+    <Description>Prompts for Discord.Net</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/LXGaming/Discord.Prompts</PackageProjectUrl>
     <PackageIcon>icon.png</PackageIcon>
