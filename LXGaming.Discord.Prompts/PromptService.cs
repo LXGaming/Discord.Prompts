@@ -97,7 +97,7 @@ public class PromptService(
                 return;
             }
 
-            if (promptMessage.Delete ?? false) {
+            if (promptMessage.Delete == true) {
                 await messageChannel.DeleteMessageAsync(messageId).ConfigureAwait(false);
             } else {
                 await messageChannel.ModifyMessageAsync(messageId, properties => {
