@@ -51,7 +51,7 @@ public class PromptService(
         }
 
         if (result.Unregister) {
-            await UnregisterAsync(interaction.Message.Id, true).ConfigureAwait(false);
+            await UnregisterAsync(interaction.Message.Id, false).ConfigureAwait(false);
         }
 
         return result;
@@ -79,7 +79,7 @@ public class PromptService(
             try {
                 await Task.Delay(delay, linkedSource.Token).ConfigureAwait(false);
             } catch (TaskCanceledException) {
-                if (promptTask.Stopped) {
+                if (!promptTask.Stopped) {
                     return;
                 }
             }
@@ -108,7 +108,7 @@ public class PromptService(
                     properties.Attachments = DiscordUtils.CreateOptional(promptMessage.Attachments);
                 }).ConfigureAwait(false);
             }
-        }).ContinueWith(_ => UnregisterAsync(messageId, true), CancellationToken.None);
+        }).ContinueWith(_ => UnregisterAsync(messageId, false), CancellationToken.None);
     }
 
     public async Task UnregisterAllAsync() {
@@ -127,7 +127,7 @@ public class PromptService(
         }
     }
 
-    public async Task<bool> UnregisterAsync(ulong key, bool stop = false) {
+    public async Task<bool> UnregisterAsync(ulong key, bool stop = true) {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
         if (!_promptTasks.TryRemove(key, out var existingPromptTask)) {
