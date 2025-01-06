@@ -120,11 +120,14 @@ public class PromptService(
 
         logger.LogTrace("Unregistering prompt {Id} ({Stop})", key, stop);
 
-        if (stop) {
-            await existingPromptTask.StopAsync().ConfigureAwait(false);
+        try {
+            if (stop) {
+                await existingPromptTask.StopAsync().ConfigureAwait(false);
+            }
+        } finally {
+            await existingPromptTask.DisposeAsync().ConfigureAwait(false);
         }
 
-        await existingPromptTask.DisposeAsync().ConfigureAwait(false);
         return true;
     }
 
