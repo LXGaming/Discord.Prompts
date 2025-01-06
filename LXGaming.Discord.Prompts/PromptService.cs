@@ -108,7 +108,7 @@ public class PromptService(
                     properties.Attachments = DiscordUtils.CreateOptional(promptMessage.Attachments);
                 }).ConfigureAwait(false);
             }
-        }).ContinueWith(_ => UnregisterAsync(messageId), CancellationToken.None);
+        }).ContinueWith(_ => UnregisterAsync(messageId, true), CancellationToken.None);
     }
 
     public async Task UnregisterAllAsync() {
