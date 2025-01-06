@@ -2,7 +2,7 @@
 
 namespace LXGaming.Discord.Prompts.Utilities;
 
-public class CancellablePrompt(PromptBase prompt) : CancellableTask {
+public class CancellablePrompt(Func<CancellableTaskContext, Task> func, PromptBase prompt) : CancellableTask(func) {
 
     public PromptBase Prompt { get; } = prompt;
 }

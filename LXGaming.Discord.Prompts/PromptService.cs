@@ -71,22 +71,21 @@ public class PromptService(
 
         logger.LogTrace("Registering prompt {Id} for expiration in {Delay}", messageId, delay);
 
-        var promptTask = _promptTasks.GetOrAdd(messageId, _ => new CancellablePrompt(prompt));
-        return promptTask.StartAsync(async () => {
+        return _promptTasks.GetOrAdd(messageId, _ => new CancellablePrompt(async context => {
             using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(
-                promptTask.CancellationToken,
+                context.CancelToken,
                 cancellationToken);
             try {
                 await Task.Delay(delay, linkedSource.Token).ConfigureAwait(false);
             } catch (TaskCanceledException) {
-                if (!promptTask.Stopped) {
+                if (!context.StopToken.IsCancellationRequested) {
                     return;
                 }
             }
 
             var promptMessage = linkedSource.IsCancellationRequested
-                ? promptTask.Prompt.CancelMessage?.Invoke()
-                : promptTask.Prompt.ExpireMessage?.Invoke();
+                ? prompt.CancelMessage?.Invoke()
+                : prompt.ExpireMessage?.Invoke();
             if (promptMessage == null) {
                 return;
             }
@@ -108,7 +107,7 @@ public class PromptService(
                     properties.Attachments = DiscordUtils.CreateOptional(promptMessage.Attachments);
                 }).ConfigureAwait(false);
             }
-        }).ContinueWith(_ => UnregisterAsync(messageId, false), CancellationToken.None);
+        }, prompt)).StartAsync().ContinueWith(_ => UnregisterAsync(messageId, false), CancellationToken.None);
     }
 
     public async Task UnregisterAllAsync() {
