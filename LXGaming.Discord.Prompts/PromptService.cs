@@ -11,7 +11,7 @@ public class PromptService(
     ILogger<PromptService> logger,
     PromptServiceConfig config) : IAsyncDisposable {
 
-    private readonly ConcurrentDictionary<ulong, CancellableTaskImpl> _promptTasks = new();
+    private readonly ConcurrentDictionary<ulong, CancellablePrompt> _promptTasks = new();
     private bool _disposed;
 
     public async Task<PromptResult> ExecuteAsync(IComponentInteraction interaction) {
@@ -71,7 +71,7 @@ public class PromptService(
 
         var channelId = message.Channel.Id;
         var messageId = message.Id;
-        var promptTask = _promptTasks.GetOrAdd(message.Id, _ => new CancellableTaskImpl(prompt));
+        var promptTask = _promptTasks.GetOrAdd(message.Id, _ => new CancellablePrompt(prompt));
         return promptTask.StartAsync(async () => {
             using var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
                 promptTask.CancellationToken,
