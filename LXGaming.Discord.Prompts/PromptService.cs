@@ -61,39 +61,39 @@ public class PromptService(
         CancellationToken cancellationToken = default) {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        if (_promptTasks.ContainsKey(message.Id)) {
+        var channelId = message.Channel.Id;
+        var messageId = message.Id;
+        var delay = timeout ?? config.DefaultTimeout;
+
+        if (_promptTasks.ContainsKey(messageId)) {
             throw new InvalidOperationException("Message is already registered");
         }
 
-        var delay = timeout ?? config.DefaultTimeout;
+        logger.LogTrace("Registering prompt {Id} for expiration in {Delay}", messageId, delay);
 
-        logger.LogTrace("Registering prompt {Id} for expiration in {Delay}", message.Id, delay);
-
-        var channelId = message.Channel.Id;
-        var messageId = message.Id;
-        var promptTask = _promptTasks.GetOrAdd(message.Id, _ => new CancellablePrompt(prompt));
+        var promptTask = _promptTasks.GetOrAdd(messageId, _ => new CancellablePrompt(prompt));
         return promptTask.StartAsync(async () => {
-            using var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
+            using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(
                 promptTask.CancellationToken,
                 cancellationToken);
             try {
-                await Task.Delay(delay, cancellationTokenSource.Token).ConfigureAwait(false);
+                await Task.Delay(delay, linkedSource.Token).ConfigureAwait(false);
             } catch (TaskCanceledException) {
                 if (promptTask.Stopped) {
                     return;
                 }
             }
 
-            var channel = await client.GetChannelAsync(channelId).ConfigureAwait(false);
-            if (channel is not IMessageChannel messageChannel) {
-                logger.LogWarning("Channel {Id} not an {Type}", channelId, nameof(IMessageChannel));
-                return;
-            }
-
-            var promptMessage = cancellationTokenSource.IsCancellationRequested
+            var promptMessage = linkedSource.IsCancellationRequested
                 ? promptTask.Prompt.CancelMessage?.Invoke()
                 : promptTask.Prompt.ExpireMessage?.Invoke();
             if (promptMessage == null) {
+                return;
+            }
+
+            var channel = await client.GetChannelAsync(channelId).ConfigureAwait(false);
+            if (channel is not IMessageChannel messageChannel) {
+                logger.LogWarning("Channel {Id} not an {Type}", channelId, nameof(IMessageChannel));
                 return;
             }
 
