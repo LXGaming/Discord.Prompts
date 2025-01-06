@@ -111,6 +111,22 @@ public class PromptService(
         }).ContinueWith(_ => UnregisterAsync(messageId), CancellationToken.None);
     }
 
+    public async Task UnregisterAllAsync() {
+        List<Exception>? exceptions = null;
+        foreach (var pair in _promptTasks) {
+            try {
+                await UnregisterAsync(pair.Key).ConfigureAwait(false);
+            } catch (Exception ex) {
+                exceptions ??= [];
+                exceptions.Add(ex);
+            }
+        }
+
+        if (exceptions != null) {
+            throw new AggregateException("Encountered an error while unregistering prompts", exceptions);
+        }
+    }
+
     public async Task<bool> UnregisterAsync(ulong key, bool stop = false) {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
