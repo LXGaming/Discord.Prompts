@@ -7,16 +7,18 @@ public static class Extensions {
 
     public static Task<IUserMessage> FollowupAsync(this PromptService promptService, IInteractionContext context,
         PaginationPromptBase prompt, TimeSpan? timeout = null, bool isTTS = false, bool ephemeral = false,
-        RequestOptions? options = null) {
-        return promptService.FollowupAsync(context.Interaction, prompt, timeout, isTTS, ephemeral, options);
+        RequestOptions? options = null, PollProperties? poll = null, MessageFlags flags = MessageFlags.None) {
+        return promptService.FollowupAsync(context.Interaction, prompt, timeout, isTTS, ephemeral, options, poll,
+            flags);
     }
 
     public static Task<IUserMessage> FollowupAsync(this PromptService promptService, IInteractionContext context,
         PromptBase prompt, TimeSpan? timeout = null, IEnumerable<FileAttachment>? attachments = null,
         string? text = null, Embed[]? embeds = null, bool isTTS = false, bool ephemeral = false,
-        AllowedMentions? allowedMentions = null, Embed? embed = null, RequestOptions? options = null) {
+        AllowedMentions? allowedMentions = null, Embed? embed = null, RequestOptions? options = null,
+        PollProperties? poll = null, MessageFlags flags = MessageFlags.None) {
         return promptService.FollowupAsync(context.Interaction, prompt, timeout, attachments, text, embeds, isTTS,
-            ephemeral, allowedMentions, embed, options);
+            ephemeral, allowedMentions, embed, options, poll, flags);
     }
 
     public static Task<IUserMessage> ModifyOriginalResponseAsync(this PromptService promptService,
@@ -35,16 +37,16 @@ public static class Extensions {
 
     public static Task<IUserMessage> RespondAsync(this PromptService promptService, IInteractionContext context,
         PaginationPromptBase prompt, TimeSpan? timeout = null, bool isTTS = false, bool ephemeral = false,
-        RequestOptions? options = null) {
-        return promptService.RespondAsync(context.Interaction, prompt, timeout, isTTS, ephemeral, options);
+        RequestOptions? options = null, PollProperties? poll = null, MessageFlags flags = MessageFlags.None) {
+        return promptService.RespondAsync(context.Interaction, prompt, timeout, isTTS, ephemeral, options, poll, flags);
     }
 
     public static Task<IUserMessage> RespondAsync(this PromptService promptService, IInteractionContext context,
         PromptBase prompt, TimeSpan? timeout = null, IEnumerable<FileAttachment>? attachments = null,
         string? text = null, Embed[]? embeds = null, bool isTTS = false, bool ephemeral = false,
-        AllowedMentions? allowedMentions = null, Embed? embed = null,
-        RequestOptions? options = null) {
+        AllowedMentions? allowedMentions = null, Embed? embed = null, RequestOptions? options = null,
+        PollProperties? poll = null, MessageFlags flags = MessageFlags.None) {
         return promptService.RespondAsync(context.Interaction, prompt, timeout, attachments, text, embeds, isTTS,
-            ephemeral, allowedMentions, embed, options);
+            ephemeral, allowedMentions, embed, options, poll, flags);
     }
 }

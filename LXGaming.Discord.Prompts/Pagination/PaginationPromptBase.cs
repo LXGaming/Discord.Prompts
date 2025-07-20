@@ -11,12 +11,13 @@ public abstract class PaginationPromptBase(
     Func<PromptMessage>? invalidUserMessage)
     : PromptBase(roleIds, userIds, cancelMessage, expireMessage, invalidUserMessage) {
 
-    public override MessageComponent Components => new ComponentBuilder()
-        .WithButton("First", "first", disabled: TotalPages < 3)
-        .WithButton("Prev", "previous", disabled: TotalPages < 2)
-        .WithButton($"Page {CurrentPage + 1} / {TotalPages}", "null", ButtonStyle.Secondary, disabled: true)
-        .WithButton("Next", "next", disabled: TotalPages < 2)
-        .WithButton("Last", "last", disabled: TotalPages < 3)
+    public override MessageComponent Components => new ComponentBuilderV2()
+        .WithActionRow(new ActionRowBuilder()
+            .WithButton("First", "first", disabled: TotalPages < 3)
+            .WithButton("Prev", "previous", disabled: TotalPages < 2)
+            .WithButton($"Page {CurrentPage + 1} / {TotalPages}", "null", ButtonStyle.Secondary, disabled: true)
+            .WithButton("Next", "next", disabled: TotalPages < 2)
+            .WithButton("Last", "last", disabled: TotalPages < 3))
         .Build();
 
     public int CurrentPage { get; private set; }
@@ -73,9 +74,9 @@ public abstract class PaginationPromptBase(
             return Components;
         }
 
-        var componentBuilder = new ComponentBuilder();
-        DiscordUtils.AddRow(componentBuilder, page.Components);
-        DiscordUtils.AddRow(componentBuilder, Components);
+        var componentBuilder = new ComponentBuilderV2();
+        DiscordUtils.AddComponents(componentBuilder, page.Components);
+        DiscordUtils.AddComponents(componentBuilder, Components);
         return componentBuilder.Build();
     }
 }

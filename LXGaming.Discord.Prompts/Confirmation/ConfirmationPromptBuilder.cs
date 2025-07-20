@@ -11,9 +11,10 @@ public class ConfirmationPromptBuilder : PromptBuilderBase<ConfirmationPromptBui
     public override ConfirmationPrompt Build() {
         if (Action == null) { throw new InvalidOperationException(nameof(Action)); }
 
-        Components ??= new ComponentBuilder()
-            .WithButton("Yes", ConfirmationPrompt.TrueKey, ButtonStyle.Success)
-            .WithButton("No", ConfirmationPrompt.FalseKey, ButtonStyle.Danger)
+        Components ??= new ComponentBuilderV2()
+            .WithActionRow(new ActionRowBuilder()
+                .WithButton("Yes", ConfirmationPrompt.TrueKey, ButtonStyle.Success)
+                .WithButton("No", ConfirmationPrompt.FalseKey, ButtonStyle.Danger))
             .Build();
 
         return new ConfirmationPrompt(DiscordUtils.CreateImmutableHashSet(Roles),

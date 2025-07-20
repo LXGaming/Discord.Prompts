@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Discord.Net.Core" Version="3.17.0" />
+    <PackageReference Include="Discord.Net.Core" Version="3.18.0" />
     <PackageReference Include="LXGaming.Common" Version="1.9.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.7" />
   </ItemGroup>
