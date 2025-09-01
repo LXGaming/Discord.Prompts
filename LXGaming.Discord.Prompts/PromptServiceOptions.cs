@@ -1,6 +1,6 @@
 ﻿namespace LXGaming.Discord.Prompts;
 
-public class PromptServiceConfig {
+public class PromptServiceOptions {
 
     public TimeSpan DefaultTimeout { get; set; }
 }

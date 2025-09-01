@@ -9,7 +9,7 @@ namespace LXGaming.Discord.Prompts;
 public class PromptService(
     IDiscordClient client,
     ILogger<PromptService> logger,
-    PromptServiceConfig config) : IAsyncDisposable {
+    PromptServiceOptions options) : IAsyncDisposable {
 
     private readonly ConcurrentDictionary<ulong, CancellablePrompt> _promptTasks = new();
     private bool _disposed;
@@ -63,7 +63,7 @@ public class PromptService(
 
         var channelId = message.Channel.Id;
         var messageId = message.Id;
-        var delay = timeout ?? config.DefaultTimeout;
+        var delay = timeout ?? options.DefaultTimeout;
 
         if (_promptTasks.ContainsKey(messageId)) {
             throw new InvalidOperationException("Message is already registered");
