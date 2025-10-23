@@ -17,20 +17,20 @@ jobs:
     name: .NET
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v5
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v5
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
-    - name: Restore
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --configuration "$CONFIGURATION" --no-restore
-    - name: Test
-      run: dotnet test --configuration "$CONFIGURATION" --no-restore --verbosity normal
-    - name: Push to nuget.org
-      if: github.event_name == 'create' && github.event.ref_type == 'tag'
-      run: dotnet nuget push */bin/Release/*.nupkg --api-key "$NUGET_TOKEN" --skip-duplicate --source https://api.nuget.org/v3/index.json
-      env:
-        NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - name: Restore
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --configuration "$CONFIGURATION" --no-restore
+      - name: Test
+        run: dotnet test --configuration "$CONFIGURATION" --no-restore --verbosity normal
+      - name: Push to nuget.org
+        if: github.event_name == 'create' && github.event.ref_type == 'tag'
+        run: dotnet nuget push */bin/Release/*.nupkg --api-key "$NUGET_TOKEN" --skip-duplicate --source https://api.nuget.org/v3/index.json
+        env:
+          NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
