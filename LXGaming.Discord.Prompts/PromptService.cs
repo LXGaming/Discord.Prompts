@@ -146,21 +146,19 @@ public class PromptService(
     }
 
     public async ValueTask DisposeAsync() {
-        await DisposeAsync(true).ConfigureAwait(false);
+        await DisposeAsyncCore().ConfigureAwait(false);
         GC.SuppressFinalize(this);
     }
 
-    protected virtual async ValueTask DisposeAsync(bool disposing) {
+    protected virtual async ValueTask DisposeAsyncCore() {
         if (_disposed) {
             return;
         }
 
-        if (disposing) {
-            foreach (var pair in _promptTasks) {
-                await pair.Value.DisposeAsync().ConfigureAwait(false);
-            }
-        }
-
         _disposed = true;
+
+        foreach (var pair in _promptTasks) {
+            await pair.Value.DisposeAsync().ConfigureAwait(false);
+        }
     }
 }
