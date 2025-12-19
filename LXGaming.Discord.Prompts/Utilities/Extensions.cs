@@ -12,7 +12,7 @@ public static class Extensions {
         var page = await prompt.GetPageAsync(prompt.CurrentPage).ConfigureAwait(false);
         var message = await interaction.FollowupAsync(page.Attachments, page.Content, page.Embeds, isTTS, ephemeral,
             page.AllowedMentions, prompt.GetComponents(page), null, options, poll, flags).ConfigureAwait(false);
-        _ = promptService.RegisterAsync(message, prompt, timeout);
+        await promptService.RegisterAsync(message, prompt, timeout).ConfigureAwait(false);
         return message;
     }
 
@@ -23,7 +23,7 @@ public static class Extensions {
         RequestOptions? options = null, PollProperties? poll = null, MessageFlags flags = MessageFlags.None) {
         var message = await interaction.FollowupAsync(attachments, text, embeds, isTTS, ephemeral, allowedMentions,
             prompt.Components, embed, options, poll, flags).ConfigureAwait(false);
-        _ = promptService.RegisterAsync(message, prompt, timeout);
+        await promptService.RegisterAsync(message, prompt, timeout).ConfigureAwait(false);
         return message;
     }
 
@@ -52,7 +52,7 @@ public static class Extensions {
             properties.AllowedMentions = DiscordUtils.CreateOptional(page.AllowedMentions);
             properties.Attachments = DiscordUtils.CreateOptional(page.Attachments);
         }, options).ConfigureAwait(false);
-        _ = promptService.RegisterAsync(message, prompt, timeout);
+        await promptService.RegisterAsync(message, prompt, timeout).ConfigureAwait(false);
         return message;
     }
 
@@ -68,7 +68,7 @@ public static class Extensions {
             properties.AllowedMentions = DiscordUtils.CreateOptional(allowedMentions);
             properties.Attachments = DiscordUtils.CreateOptional(attachments);
         }, options).ConfigureAwait(false);
-        _ = promptService.RegisterAsync(message, prompt, timeout);
+        await promptService.RegisterAsync(message, prompt, timeout).ConfigureAwait(false);
         return message;
     }
 
@@ -80,7 +80,7 @@ public static class Extensions {
         await interaction.RespondAsync(page.Attachments, page.Content, page.Embeds, isTTS, ephemeral,
             page.AllowedMentions, prompt.GetComponents(page), null, options, poll, flags).ConfigureAwait(false);
         var message = await interaction.GetOriginalResponseAsync().ConfigureAwait(false);
-        _ = promptService.RegisterAsync(message, prompt, timeout);
+        await promptService.RegisterAsync(message, prompt, timeout).ConfigureAwait(false);
         return message;
     }
 
@@ -92,7 +92,7 @@ public static class Extensions {
         await interaction.RespondAsync(attachments, text, embeds, isTTS, ephemeral, allowedMentions, prompt.Components,
             embed, options, poll, flags).ConfigureAwait(false);
         var message = await interaction.GetOriginalResponseAsync().ConfigureAwait(false);
-        _ = promptService.RegisterAsync(message, prompt, timeout);
+        await promptService.RegisterAsync(message, prompt, timeout).ConfigureAwait(false);
         return message;
     }
 

@@ -1,22 +1,43 @@
-﻿using System.Collections.Concurrent;
-using Discord;
+﻿using Discord;
+using LXGaming.Common.Threading.Tasks;
 using LXGaming.Discord.Prompts.Utilities;
 using Microsoft.Extensions.Logging;
 
 namespace LXGaming.Discord.Prompts;
 
-public class PromptService(
-    IDiscordClient client,
-    ILogger<PromptService> logger,
-    PromptServiceOptions options) : IAsyncDisposable {
+public class PromptService : IAsyncDisposable {
 
-    private readonly ConcurrentDictionary<ulong, CancellablePrompt> _promptTasks = new();
+    private readonly IDiscordClient _client;
+    private readonly ILogger<PromptService> _logger;
+    private readonly PromptServiceOptions _options;
+    private readonly CancellableTaskCollection<PromptKey> _promptTasks;
     private bool _disposed;
+
+    public PromptService(IDiscordClient client, ILogger<PromptService> logger, PromptServiceOptions options) {
+        _client = client;
+        _logger = logger;
+        _options = options;
+        _promptTasks = new CancellableTaskCollection<PromptKey>();
+
+        _promptTasks.Registered += (_, args) => {
+            _logger.LogTrace("Registered prompt {Id} with timeout {Timeout}", args.Key.MessageId, args.Key.Timeout);
+            return Task.CompletedTask;
+        };
+        _promptTasks.UnhandledException += (_, args) => {
+            _logger.LogError(args.Exception, "Encountered an error while handling prompt {Id}", args.Key.MessageId);
+            return Task.CompletedTask;
+        };
+        _promptTasks.Unregistered += (_, args) => {
+            _logger.LogTrace("Unregistered prompt {Id}", args.Key.MessageId);
+            return Task.CompletedTask;
+        };
+    }
 
     public async Task<PromptResult> ExecuteAsync(IComponentInteraction interaction) {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        if (!_promptTasks.TryGetValue(interaction.Message.Id, out var existingPromptTask)) {
+        var key = _promptTasks.FirstOrDefault(key => key.MessageId == interaction.Message.Id);
+        if (key == null) {
             return new PromptResult {
                 Message = $"{interaction.Message.Id} is not registered",
                 Status = PromptStatus.UnregisteredMessage
@@ -25,7 +46,7 @@ public class PromptService(
 
         PromptResult result;
         try {
-            var prompt = existingPromptTask.Prompt;
+            var prompt = key.Prompt;
             if (!prompt.IsValidUser(interaction.User)) {
                 var invalidUserMessage = prompt.InvalidUserMessage?.Invoke();
                 if (invalidUserMessage != null) {
@@ -50,48 +71,44 @@ public class PromptService(
         }
 
         if (result.Unregister) {
-            await UnregisterAsync(interaction.Message.Id, false).ConfigureAwait(false);
+            await _promptTasks.UnregisterAsync(key, false).ConfigureAwait(false);
         }
 
         return result;
     }
 
-    public Task RegisterAsync(IUserMessage message, PromptBase prompt, TimeSpan? timeout = null,
-        CancellationToken cancellationToken = default) {
+    public Task<bool> RegisterAsync(IUserMessage message, PromptBase prompt, TimeSpan? timeout = null) {
         ObjectDisposedException.ThrowIf(_disposed, this);
-
+        var guildId = (message.Channel as IGuildChannel)?.GuildId;
         var channelId = message.Channel.Id;
         var messageId = message.Id;
-        var delay = timeout ?? options.DefaultTimeout;
-
-        if (_promptTasks.ContainsKey(messageId)) {
-            throw new InvalidOperationException("Message is already registered");
-        }
-
-        logger.LogTrace("Registering prompt {Id} for expiration in {Delay}", messageId, delay);
-
-        return _promptTasks.GetOrAdd(messageId, _ => new CancellablePrompt(async context => {
-            using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(
-                context.CancelToken,
-                cancellationToken);
+        var userId = message.Author.Id;
+        var delay = timeout ?? _options.DefaultTimeout;
+        var key = new PromptKey(guildId, channelId, messageId, userId, prompt, delay);
+        return _promptTasks.RegisterAsync(key, async context => {
             try {
-                await Task.Delay(delay, linkedSource.Token).ConfigureAwait(false);
+                await Task.Delay(delay, context.CancelToken).ConfigureAwait(false);
             } catch (TaskCanceledException) {
                 if (!context.StopToken.IsCancellationRequested) {
                     return;
                 }
             }
 
-            var promptMessage = linkedSource.IsCancellationRequested
+            var promptMessage = context.CancelToken.IsCancellationRequested
                 ? prompt.CancelMessage?.Invoke()
                 : prompt.ExpireMessage?.Invoke();
             if (promptMessage == null) {
                 return;
             }
 
-            var channel = await client.GetChannelAsync(channelId).ConfigureAwait(false);
+            var channel = await _client.GetChannelAsync(channelId).ConfigureAwait(false);
+            if (channel == null) {
+                _logger.LogWarning("Channel {Id} not found", channelId);
+                return;
+            }
+
             if (channel is not IMessageChannel messageChannel) {
-                logger.LogWarning("Channel {Id} not an {Type}", channelId, nameof(IMessageChannel));
+                _logger.LogWarning("Channel {Id} is not an {Type}", channelId, nameof(IMessageChannel));
                 return;
             }
 
@@ -106,43 +123,17 @@ public class PromptService(
                     properties.Attachments = DiscordUtils.CreateOptional(promptMessage.Attachments);
                 }).ConfigureAwait(false);
             }
-        }, prompt)).StartAsync().ContinueWith(_ => UnregisterAsync(messageId, false), CancellationToken.None);
+        });
     }
 
-    public async Task UnregisterAllAsync() {
-        List<Exception>? exceptions = null;
-        foreach (var pair in _promptTasks) {
-            try {
-                await UnregisterAsync(pair.Key).ConfigureAwait(false);
-            } catch (Exception ex) {
-                exceptions ??= [];
-                exceptions.Add(ex);
-            }
-        }
-
-        if (exceptions != null) {
-            throw new AggregateException("Encountered an error while unregistering prompts", exceptions);
-        }
-    }
-
-    public async Task<bool> UnregisterAsync(ulong key, bool stop = true) {
+    public Task UnregisterAllAsync(bool stop = true) {
         ObjectDisposedException.ThrowIf(_disposed, this);
+        return _promptTasks.UnregisterAllAsync(stop);
+    }
 
-        if (!_promptTasks.TryRemove(key, out var existingPromptTask)) {
-            return false;
-        }
-
-        logger.LogTrace("Unregistering prompt {Id} ({Stop})", key, stop);
-
-        try {
-            if (stop) {
-                await existingPromptTask.StopAsync().ConfigureAwait(false);
-            }
-        } finally {
-            await existingPromptTask.DisposeAsync().ConfigureAwait(false);
-        }
-
-        return true;
+    public Task UnregisterAllAsync(Predicate<PromptKey> match, bool stop = true) {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        return _promptTasks.UnregisterAllAsync(match, stop);
     }
 
     public async ValueTask DisposeAsync() {
@@ -157,8 +148,6 @@ public class PromptService(
 
         _disposed = true;
 
-        foreach (var pair in _promptTasks) {
-            await pair.Value.DisposeAsync().ConfigureAwait(false);
-        }
+        await _promptTasks.DisposeAsync().ConfigureAwait(false);
     }
 }
