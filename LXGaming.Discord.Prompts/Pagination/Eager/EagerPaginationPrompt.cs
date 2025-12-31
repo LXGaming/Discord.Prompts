@@ -1,4 +1,4 @@
-﻿namespace LXGaming.Discord.Prompts.Pagination.Eager;
+namespace LXGaming.Discord.Prompts.Pagination.Eager;
 
 public class EagerPaginationPrompt(
     IReadOnlyCollection<ulong> roleIds,

@@ -1,4 +1,4 @@
-﻿namespace LXGaming.Discord.Prompts;
+namespace LXGaming.Discord.Prompts;
 
 public class PromptResult {
 

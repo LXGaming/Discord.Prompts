@@ -1,4 +1,4 @@
-﻿using Discord;
+using Discord;
 using LXGaming.Discord.Prompts.Utilities;
 
 namespace LXGaming.Discord.Prompts.Pagination;

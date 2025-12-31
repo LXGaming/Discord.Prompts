@@ -1,4 +1,4 @@
-﻿using LXGaming.Discord.Prompts.Utilities;
+using LXGaming.Discord.Prompts.Utilities;
 
 namespace LXGaming.Discord.Prompts.Pagination.Lazy;
 

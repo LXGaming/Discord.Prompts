@@ -1,4 +1,4 @@
-﻿using Discord;
+using Discord;
 using LXGaming.Common.Threading.Tasks;
 using LXGaming.Discord.Prompts.Utilities;
 using Microsoft.Extensions.Logging;
