@@ -79,6 +79,7 @@ public class PromptService : IAsyncDisposable {
 
     public Task<bool> RegisterAsync(IUserMessage message, PromptBase prompt, TimeSpan? timeout = null) {
         ObjectDisposedException.ThrowIf(_disposed, this);
+        var channel = message.Channel;
         var guildId = (message.Channel as IGuildChannel)?.GuildId;
         var channelId = message.Channel.Id;
         var messageId = message.Id;
@@ -101,21 +102,10 @@ public class PromptService : IAsyncDisposable {
                 return;
             }
 
-            var channel = await _client.GetChannelAsync(channelId).ConfigureAwait(false);
-            if (channel == null) {
-                _logger.LogWarning("Channel {Id} not found", channelId);
-                return;
-            }
-
-            if (channel is not IMessageChannel messageChannel) {
-                _logger.LogWarning("Channel {Id} is not an {Type}", channelId, nameof(IMessageChannel));
-                return;
-            }
-
             if (promptMessage.Delete == true) {
-                await messageChannel.DeleteMessageAsync(messageId).ConfigureAwait(false);
+                await channel.DeleteMessageAsync(messageId).ConfigureAwait(false);
             } else {
-                await messageChannel.ModifyMessageAsync(messageId, properties => {
+                await channel.ModifyMessageAsync(messageId, properties => {
                     properties.Content = DiscordUtils.CreateOptional(promptMessage.Content);
                     properties.Embeds = DiscordUtils.CreateOptional(promptMessage.Embeds);
                     properties.Components = DiscordUtils.CreateOptional(promptMessage.Components ?? MessageComponent.Empty);
