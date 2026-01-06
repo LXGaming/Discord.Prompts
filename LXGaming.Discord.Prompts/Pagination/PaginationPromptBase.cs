@@ -1,11 +1,12 @@
+using System.Collections.Frozen;
 using Discord;
 using LXGaming.Discord.Prompts.Utilities;
 
 namespace LXGaming.Discord.Prompts.Pagination;
 
 public abstract class PaginationPromptBase(
-    IReadOnlyCollection<ulong> roleIds,
-    IReadOnlyCollection<ulong> userIds,
+    FrozenSet<ulong> roleIds,
+    FrozenSet<ulong> userIds,
     Func<PromptMessage>? cancelMessage,
     Func<PromptMessage>? expireMessage,
     Func<PromptMessage>? invalidUserMessage)

@@ -1,4 +1,4 @@
-using System.Collections.Immutable;
+using System.Collections.Frozen;
 using Discord;
 
 namespace LXGaming.Discord.Prompts.Utilities;
@@ -11,8 +11,8 @@ public static class DiscordUtils {
         }
     }
 
-    public static ImmutableHashSet<ulong> CreateImmutableHashSet(IEnumerable<IEntity<ulong>>? entities) {
-        return entities?.Select(entity => entity.Id).ToImmutableHashSet() ?? ImmutableHashSet<ulong>.Empty;
+    public static FrozenSet<ulong> CreateFrozenSet(IEnumerable<IEntity<ulong>>? entities) {
+        return entities?.Select(entity => entity.Id).ToFrozenSet() ?? FrozenSet<ulong>.Empty;
     }
 
     public static Optional<T> CreateOptional<T>(T? value) {

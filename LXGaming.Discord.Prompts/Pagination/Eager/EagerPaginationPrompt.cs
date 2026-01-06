@@ -1,8 +1,11 @@
+using System.Collections.Frozen;
+using System.Collections.Immutable;
+
 namespace LXGaming.Discord.Prompts.Pagination.Eager;
 
 public class EagerPaginationPrompt(
-    IReadOnlyCollection<ulong> roleIds,
-    IReadOnlyCollection<ulong> userIds,
+    FrozenSet<ulong> roleIds,
+    FrozenSet<ulong> userIds,
     Func<PromptMessage>? cancelMessage,
     Func<PromptMessage>? expireMessage,
     Func<PromptMessage>? invalidUserMessage,

@@ -12,9 +12,8 @@ public class LazyPaginationPromptBuilder : PromptBuilderBase<LazyPaginationPromp
         if (Action == null) { throw new InvalidOperationException(nameof(Action)); }
         if (TotalPages <= 0) { throw new IndexOutOfRangeException(nameof(TotalPages)); }
 
-        return new LazyPaginationPrompt(DiscordUtils.CreateImmutableHashSet(Roles),
-            DiscordUtils.CreateImmutableHashSet(Users), CancelMessage, ExpireMessage, InvalidUserMessage, Action,
-            CachePages, TotalPages);
+        return new LazyPaginationPrompt(DiscordUtils.CreateFrozenSet(Roles), DiscordUtils.CreateFrozenSet(Users),
+            CancelMessage, ExpireMessage, InvalidUserMessage, Action, CachePages, TotalPages);
     }
 
     public LazyPaginationPromptBuilder WithAction(Func<int, Task<PromptMessage>>? action) {

@@ -1,10 +1,11 @@
+using System.Collections.Frozen;
 using Discord;
 
 namespace LXGaming.Discord.Prompts.Custom;
 
 public class CustomPrompt(
-    IReadOnlyCollection<ulong> roleIds,
-    IReadOnlyCollection<ulong> userIds,
+    FrozenSet<ulong> roleIds,
+    FrozenSet<ulong> userIds,
     Func<PromptMessage>? cancelMessage,
     Func<PromptMessage>? expireMessage,
     Func<PromptMessage>? invalidUserMessage,

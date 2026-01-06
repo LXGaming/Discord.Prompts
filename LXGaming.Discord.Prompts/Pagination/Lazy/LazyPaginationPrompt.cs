@@ -1,10 +1,11 @@
 using System.Collections.Concurrent;
+using System.Collections.Frozen;
 
 namespace LXGaming.Discord.Prompts.Pagination.Lazy;
 
 public class LazyPaginationPrompt(
-    IReadOnlyCollection<ulong> roleIds,
-    IReadOnlyCollection<ulong> userIds,
+    FrozenSet<ulong> roleIds,
+    FrozenSet<ulong> userIds,
     Func<PromptMessage>? cancelMessage,
     Func<PromptMessage>? expireMessage,
     Func<PromptMessage>? invalidUserMessage,

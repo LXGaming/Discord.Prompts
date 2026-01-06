@@ -12,9 +12,8 @@ public class EagerPaginationPromptBuilder : PromptBuilderBase<EagerPaginationPro
         if (Pages == null) { throw new InvalidOperationException(nameof(Pages)); }
         if (Pages.Count <= 0) { throw new IndexOutOfRangeException(nameof(Pages)); }
 
-        return new EagerPaginationPrompt(DiscordUtils.CreateImmutableHashSet(Roles),
-            DiscordUtils.CreateImmutableHashSet(Users), CancelMessage, ExpireMessage, InvalidUserMessage,
-            Pages.ToImmutableArray());
+        return new EagerPaginationPrompt(DiscordUtils.CreateFrozenSet(Roles), DiscordUtils.CreateFrozenSet(Users),
+            CancelMessage, ExpireMessage, InvalidUserMessage, Pages.ToImmutableArray());
     }
 
     public EagerPaginationPromptBuilder WithPages(params PromptMessage[] pages) {

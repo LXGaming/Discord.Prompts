@@ -17,9 +17,8 @@ public class ConfirmationPromptBuilder : PromptBuilderBase<ConfirmationPromptBui
                 .WithButton("No", ConfirmationPrompt.FalseKey, ButtonStyle.Danger))
             .Build();
 
-        return new ConfirmationPrompt(DiscordUtils.CreateImmutableHashSet(Roles),
-            DiscordUtils.CreateImmutableHashSet(Users), CancelMessage, ExpireMessage, InvalidUserMessage,
-            Components, Action);
+        return new ConfirmationPrompt(DiscordUtils.CreateFrozenSet(Roles), DiscordUtils.CreateFrozenSet(Users),
+            CancelMessage, ExpireMessage, InvalidUserMessage, Components, Action);
     }
 
     public ConfirmationPromptBuilder WithComponents(MessageComponent? components) {
