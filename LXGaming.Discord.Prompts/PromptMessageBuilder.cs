@@ -13,7 +13,7 @@ public sealed class PromptMessageBuilder {
     public IList<Embed>? Embeds { get; set; }
 
     public PromptMessage Build() {
-        return new PromptMessage(AllowedMentions, Attachments?.ToImmutableList(), Components, Content, Delete,
+        return new PromptMessage(AllowedMentions, Attachments?.ToImmutableArray(), Components, Content, Delete,
             Embeds?.ToArray());
     }
 

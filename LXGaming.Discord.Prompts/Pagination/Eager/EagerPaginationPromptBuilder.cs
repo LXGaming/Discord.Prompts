@@ -14,7 +14,7 @@ public class EagerPaginationPromptBuilder : PromptBuilderBase<EagerPaginationPro
 
         return new EagerPaginationPrompt(DiscordUtils.CreateImmutableHashSet(Roles),
             DiscordUtils.CreateImmutableHashSet(Users), CancelMessage, ExpireMessage, InvalidUserMessage,
-            Pages.ToImmutableList());
+            Pages.ToImmutableArray());
     }
 
     public EagerPaginationPromptBuilder WithPages(params PromptMessage[] pages) {
