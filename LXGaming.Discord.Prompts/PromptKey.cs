@@ -6,4 +6,9 @@ public sealed record PromptKey(
     ulong MessageId,
     ulong UserId,
     PromptBase Prompt,
-    TimeSpan Timeout);
+    TimeSpan Timeout) {
+
+    public override string ToString() {
+        return MessageId.ToString();
+    }
+}

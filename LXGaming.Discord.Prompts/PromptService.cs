@@ -20,15 +20,15 @@ public class PromptService : IAsyncDisposable {
         _promptTasks = new CancellableTaskCollection<PromptKey>();
 
         _promptTasks.Added += (_, args) => {
-            _logger.LogTrace("Registered prompt {Id} with timeout {Timeout}", args.Key.MessageId, args.Key.Timeout);
+            _logger.LogTrace("Registered prompt {Prompt} with timeout {Timeout}", args.Key, args.Key.Timeout);
             return Task.CompletedTask;
         };
         _promptTasks.Removed += (_, args) => {
-            _logger.LogTrace("Unregistered prompt {Id}", args.Key.MessageId);
+            _logger.LogTrace("Unregistered prompt {Prompt}", args.Key);
             return Task.CompletedTask;
         };
         _promptTasks.UnhandledException += (_, args) => {
-            _logger.LogError(args.Exception, "Encountered an error while handling prompt {Id}", args.Key.MessageId);
+            _logger.LogError(args.Exception, "Encountered an error while handling prompt {Prompt}", args.Key);
             return Task.CompletedTask;
         };
     }
