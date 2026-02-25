@@ -19,16 +19,16 @@ public class PromptService : IAsyncDisposable {
         _options = options;
         _promptTasks = new CancellableTaskCollection<PromptKey>();
 
-        _promptTasks.Registered += (_, args) => {
+        _promptTasks.Added += (_, args) => {
             _logger.LogTrace("Registered prompt {Id} with timeout {Timeout}", args.Key.MessageId, args.Key.Timeout);
+            return Task.CompletedTask;
+        };
+        _promptTasks.Removed += (_, args) => {
+            _logger.LogTrace("Unregistered prompt {Id}", args.Key.MessageId);
             return Task.CompletedTask;
         };
         _promptTasks.UnhandledException += (_, args) => {
             _logger.LogError(args.Exception, "Encountered an error while handling prompt {Id}", args.Key.MessageId);
-            return Task.CompletedTask;
-        };
-        _promptTasks.Unregistered += (_, args) => {
-            _logger.LogTrace("Unregistered prompt {Id}", args.Key.MessageId);
             return Task.CompletedTask;
         };
     }
@@ -71,7 +71,7 @@ public class PromptService : IAsyncDisposable {
         }
 
         if (result.Unregister) {
-            await _promptTasks.UnregisterAsync(key, false).ConfigureAwait(false);
+            await _promptTasks.RemoveAsync(key, false).ConfigureAwait(false);
         }
 
         return result;
@@ -86,7 +86,7 @@ public class PromptService : IAsyncDisposable {
         var userId = message.Author.Id;
         var delay = timeout ?? _options.DefaultTimeout;
         var key = new PromptKey(guildId, channelId, messageId, userId, prompt, delay);
-        return _promptTasks.RegisterAsync(key, async context => {
+        return _promptTasks.AddAsync(key, async context => {
             try {
                 await Task.Delay(delay, context.CancelToken).ConfigureAwait(false);
             } catch (TaskCanceledException) {
@@ -118,12 +118,12 @@ public class PromptService : IAsyncDisposable {
 
     public Task UnregisterAllAsync(bool stop = true) {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        return _promptTasks.UnregisterAllAsync(stop);
+        return _promptTasks.RemoveAllAsync(stop);
     }
 
     public Task UnregisterAllAsync(Predicate<PromptKey> match, bool stop = true) {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        return _promptTasks.UnregisterAllAsync(match, stop);
+        return _promptTasks.RemoveAllAsync(match, stop);
     }
 
     public async ValueTask DisposeAsync() {
