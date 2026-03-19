@@ -127,11 +127,11 @@ public class PromptService : IAsyncDisposable {
     }
 
     public async ValueTask DisposeAsync() {
-        await DisposeAsyncCore().ConfigureAwait(false);
+        await DisposeInternalAsync().ConfigureAwait(false);
         GC.SuppressFinalize(this);
     }
 
-    protected virtual async ValueTask DisposeAsyncCore() {
+    protected virtual async ValueTask DisposeInternalAsync() {
         if (_disposed) {
             return;
         }
