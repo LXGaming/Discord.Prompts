@@ -39,7 +39,7 @@ jobs:
         id: login
         uses: NuGet/login@v1
         with:
-          user: ${{ secrets.NUGET_USER }}
+          user: ${{ secrets.NUGET_USER || vars.NUGET_USER }}
       - name: Push to nuget.org
         if: github.event_name == 'create' && github.event.ref_type == 'tag'
         run: dotnet nuget push */bin/Release/*.nupkg --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" --skip-duplicate --source https://api.nuget.org/v3/index.json
